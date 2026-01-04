@@ -234,25 +234,33 @@ export function ActorIntakeForm() {
   const showSkillsOther = skills.includes("אחר");
 
   return (
-    <div className="min-h-screen py-8 px-4 relative overflow-hidden">
-      {/* Microphone background decorations - full height */}
-      <div className="absolute inset-y-0 left-0 w-[400px] opacity-15 pointer-events-none hidden lg:block">
+    <div className="min-h-screen relative">
+      {/* Fixed microphone background decorations */}
+      <div className="fixed top-0 left-0 h-screen w-[350px] opacity-20 pointer-events-none hidden lg:block z-0">
         <img 
           src={microphoneBg} 
           alt="" 
-          className="w-full h-full object-cover grayscale"
+          className="w-full h-full object-contain object-top grayscale"
           style={{ transform: 'scaleX(-1)' }}
         />
       </div>
-      <div className="absolute inset-y-0 right-0 w-[400px] opacity-15 pointer-events-none hidden lg:block">
+      <div className="fixed top-0 right-0 h-screen w-[350px] opacity-20 pointer-events-none hidden lg:block z-0">
         <img 
           src={microphoneBg} 
           alt="" 
-          className="w-full h-full object-cover grayscale"
+          className="w-full h-full object-contain object-top grayscale"
         />
       </div>
 
-      <div className="max-w-lg md:max-w-2xl mx-auto relative z-10">
+      {/* White fade gradient overlay for center content */}
+      <div className="fixed inset-0 pointer-events-none z-[1] hidden lg:block"
+        style={{
+          background: 'linear-gradient(to right, transparent 0%, transparent 15%, rgba(255,255,255,0.85) 25%, rgba(255,255,255,0.95) 35%, rgba(255,255,255,0.95) 65%, rgba(255,255,255,0.85) 75%, transparent 85%, transparent 100%)'
+        }}
+      />
+
+      <div className="py-8 px-4 relative z-10">
+        <div className="max-w-lg md:max-w-2xl mx-auto relative">
         {/* Header with logo and social links */}
         <header className="flex items-center justify-between mb-8 px-2">
           {/* Logo - Right side (RTL so appears on right) */}
@@ -563,6 +571,7 @@ export function ActorIntakeForm() {
             )}
           </button>
         </form>
+        </div>
       </div>
     </div>
   );
