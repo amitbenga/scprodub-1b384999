@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Loader2 } from "lucide-react";
+import { Loader2, User, Briefcase, Languages, Sparkles, FileText, Image } from "lucide-react";
 
 import { FormSection } from "./FormSection";
 import { ChipSelect } from "./ChipSelect";
@@ -285,10 +285,10 @@ export function ActorIntakeForm() {
           <p className="text-muted-foreground">הצטרפו למאגר השחקנים שלנו ותהיו חלק מהפקות בינלאומיות</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8 bg-card p-6 rounded-xl shadow-sm border border-border">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Section 1: Personal Details */}
-          <FormSection title="פרטים אישיים">
-            <p className="text-xs text-muted-foreground -mt-2">משמש לזיהוי במערכת</p>
+          <FormSection title="פרטים אישיים" icon={User}>
+            <p className="text-xs text-muted-foreground -mt-2 mb-4">משמש לזיהוי במערכת</p>
             
             <div className="space-y-2">
               <Label htmlFor="fullName">שם מלא *</Label>
@@ -333,7 +333,7 @@ export function ActorIntakeForm() {
           </FormSection>
 
           {/* Section 2: Professional Info */}
-          <FormSection title="מידע מקצועי">
+          <FormSection title="מידע מקצועי" icon={Briefcase}>
             <div className="space-y-2">
               <Label>מגדר *</Label>
               <Select value={gender} onValueChange={setGender}>
@@ -393,7 +393,7 @@ export function ActorIntakeForm() {
           </FormSection>
 
           {/* Section 3: Languages */}
-          <FormSection title="שפות">
+          <FormSection title="שפות" icon={Languages}>
             <div className="space-y-2">
               <Label>שפות *</Label>
               <ChipSelect
@@ -423,7 +423,7 @@ export function ActorIntakeForm() {
           </FormSection>
 
           {/* Section 4: Skills */}
-          <FormSection title="כישורים">
+          <FormSection title="כישורים" icon={Sparkles}>
             <div className="space-y-2">
               <Label>כישורים</Label>
               <ChipSelect
@@ -450,7 +450,7 @@ export function ActorIntakeForm() {
           </FormSection>
 
           {/* Section 5: Additional Info */}
-          <FormSection title="מידע משלים">
+          <FormSection title="מידע משלים" icon={FileText}>
             <div className="space-y-2">
               <Label>זמר/ת</Label>
               <RadioGroup
@@ -508,7 +508,7 @@ export function ActorIntakeForm() {
           </FormSection>
 
           {/* Section 6: Media */}
-          <FormSection title="מדיה (מומלץ)">
+          <FormSection title="מדיה (מומלץ)" icon={Image}>
             <div className="space-y-2">
               <Label>תמונה</Label>
               <FileUpload
@@ -533,20 +533,20 @@ export function ActorIntakeForm() {
           </FormSection>
 
           {/* Submit */}
-          <Button
+          <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-12 text-base font-medium"
+            className="submit-btn"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin ml-2" />
+                <Loader2 className="h-5 w-5 animate-spin ml-2 inline" />
                 שולח...
               </>
             ) : (
               "שליחה"
             )}
-          </Button>
+          </button>
         </form>
       </div>
     </div>

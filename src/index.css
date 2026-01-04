@@ -2,44 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hebrew Actor Intake Form Design System
+   Clean, professional, app-like aesthetic with warm tones
+   All colors in HSL format
+*/
+
 @layer base {
   :root {
+    /* Core palette - cinematic dark slate with blue accent */
     --background: 220 20% 97%;
-    --foreground: 220 20% 10%;
+    --foreground: 220 25% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 220 25% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
+    --popover-foreground: 220 25% 12%;
 
+    /* Primary - SCprodub blue */
     --primary: 212 85% 48%;
     --primary-foreground: 0 0% 100%;
+    --primary-hover: 212 85% 42%;
 
-    --secondary: 212 30% 94%;
-    --secondary-foreground: 212 85% 30%;
+    /* Secondary - soft slate */
+    --secondary: 220 15% 94%;
+    --secondary-foreground: 220 20% 35%;
 
-    --muted: 220 15% 92%;
-    --muted-foreground: 220 10% 45%;
+    /* Muted - cool gray */
+    --muted: 220 15% 94%;
+    --muted-foreground: 220 12% 50%;
 
+    /* Accent - cinema gold */
     --accent: 45 90% 55%;
-    --accent-foreground: 45 90% 15%;
+    --accent-foreground: 220 25% 12%;
 
-    --success: 150 60% 42%;
-    --success-foreground: 0 0% 100%;
-
-    --gold: 45 90% 55%;
-    --gold-foreground: 45 90% 15%;
-
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
+    /* Form-specific */
     --border: 220 15% 88%;
     --input: 220 15% 88%;
+    --input-focus: 212 85% 48%;
     --ring: 212 85% 48%;
 
     --radius: 0.75rem;
 
+    /* Section styling */
+    --section-bg: 0 0% 100%;
+    --section-border: 220 15% 90%;
+    --section-header: 220 25% 18%;
+
+    /* Success state */
+    --success: 150 60% 42%;
+    --success-foreground: 0 0% 100%;
+    --success-bg: 150 50% 96%;
+
+    /* Form field focus glow */
+    --focus-glow: 212 85% 48% / 0.15;
+
+    /* Background gradient */
+    --gradient-start: 220 25% 96%;
+    --gradient-end: 212 30% 94%;
+
+    /* Gold accent */
+    --gold: 45 90% 55%;
+    --gold-foreground: 45 90% 15%;
+
+    /* Sidebar (unused but required) */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -51,39 +80,48 @@
   }
 
   .dark {
-    --background: 220 20% 8%;
-    --foreground: 220 10% 95%;
+    --background: 220 15% 10%;
+    --foreground: 40 20% 95%;
 
-    --card: 220 20% 12%;
-    --card-foreground: 220 10% 95%;
+    --card: 220 15% 13%;
+    --card-foreground: 40 20% 95%;
 
-    --popover: 220 20% 12%;
-    --popover-foreground: 220 10% 95%;
+    --popover: 220 15% 13%;
+    --popover-foreground: 40 20% 95%;
 
     --primary: 212 85% 55%;
     --primary-foreground: 0 0% 100%;
+    --primary-hover: 212 85% 62%;
 
-    --secondary: 212 30% 20%;
-    --secondary-foreground: 212 30% 90%;
+    --secondary: 220 15% 18%;
+    --secondary-foreground: 40 20% 90%;
 
     --muted: 220 15% 18%;
     --muted-foreground: 220 10% 60%;
 
-    --accent: 45 90% 55%;
-    --accent-foreground: 45 90% 10%;
+    --accent: 38 70% 50%;
+    --accent-foreground: 0 0% 100%;
 
-    --success: 150 60% 45%;
-    --success-foreground: 0 0% 100%;
-
-    --gold: 45 90% 55%;
-    --gold-foreground: 45 90% 10%;
-
-    --destructive: 0 62% 35%;
+    --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 15% 22%;
     --input: 220 15% 22%;
+    --input-focus: 212 85% 55%;
     --ring: 212 85% 55%;
+
+    --section-bg: 220 15% 13%;
+    --section-border: 220 15% 20%;
+    --section-header: 40 20% 92%;
+
+    --success: 150 60% 45%;
+    --success-foreground: 0 0% 100%;
+    --success-bg: 150 40% 15%;
+
+    --focus-glow: 212 85% 55% / 0.25;
+
+    --gold: 45 90% 55%;
+    --gold-foreground: 45 90% 10%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -106,19 +144,199 @@
   }
 
   body {
-    @apply bg-background text-foreground font-heebo antialiased;
-    background: linear-gradient(135deg, hsl(220 20% 97%) 0%, hsl(212 30% 94%) 100%);
+    @apply text-foreground font-sans antialiased;
+    font-family: 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(
+      165deg,
+      hsl(var(--gradient-start)) 0%,
+      hsl(var(--gradient-end)) 50%,
+      hsl(220 20% 95%) 100%
+    );
     min-height: 100vh;
+  }
+
+  /* Form-specific base styles */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  textarea,
+  select {
+    @apply text-right;
+    direction: rtl;
+  }
+
+  /* Number input - keep numbers LTR for readability */
+  input[type="tel"],
+  input[type="number"] {
+    direction: ltr;
+    text-align: right;
   }
 }
 
 @layer components {
+  /* Form section styling */
+  .form-section {
+    @apply bg-card rounded-xl border border-section-border p-6 mb-6;
+    box-shadow: 
+      0 1px 3px 0 hsl(220 25% 12% / 0.04),
+      0 4px 12px -2px hsl(220 25% 12% / 0.06);
+    backdrop-filter: blur(8px);
+  }
+
+  .form-section-header {
+    @apply text-lg font-semibold mb-5 pb-3 border-b border-section-border flex items-center gap-2;
+    color: hsl(var(--section-header));
+  }
+
+  .form-section-header-icon {
+    @apply w-5 h-5 text-primary opacity-80;
+  }
+
+  /* Field styling */
+  .form-field {
+    @apply mb-5 last:mb-0;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-foreground mb-2;
+  }
+
+  .form-label-required::after {
+    content: ' *';
+    @apply text-destructive;
+  }
+
+  .form-helper {
+    @apply text-xs text-muted-foreground mt-1.5;
+  }
+
+  .form-error {
+    @apply text-xs text-destructive mt-1.5 flex items-center gap-1;
+  }
+
+  /* Multi-select chips */
+  .chip-container {
+    @apply flex flex-wrap gap-2;
+  }
+
   .chip {
-    @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition-all cursor-pointer select-none;
-    @apply border border-border bg-card hover:bg-muted;
+    @apply px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200;
+    @apply border border-border bg-card text-foreground;
+    @apply hover:border-primary/50 hover:bg-primary/5;
   }
 
   .chip-selected {
-    @apply bg-primary text-primary-foreground border-primary hover:bg-primary/90;
+    @apply bg-primary text-primary-foreground border-primary;
+    @apply hover:bg-primary/90 hover:border-primary/90;
+  }
+
+  /* Radio button styling */
+  .radio-group {
+    @apply flex gap-4;
+  }
+
+  .radio-option {
+    @apply flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200;
+    @apply border border-border bg-card text-foreground;
+    @apply hover:border-primary/50 hover:bg-primary/5;
+  }
+
+  .radio-option-selected {
+    @apply bg-primary/10 text-primary border-primary;
+  }
+
+  /* File upload styling */
+  .file-upload-zone {
+    @apply border-2 border-dashed border-border rounded-xl p-6 text-center cursor-pointer transition-all duration-200;
+    @apply hover:border-primary/50 hover:bg-primary/5;
+  }
+
+  .file-upload-zone-active {
+    @apply border-primary bg-primary/5;
+  }
+
+  .file-upload-zone-has-file {
+    @apply border-success;
+    background-color: hsl(var(--success-bg));
+  }
+
+  /* Submit button */
+  .submit-btn {
+    @apply w-full py-4 px-8 rounded-xl text-lg font-semibold transition-all duration-300;
+    @apply bg-primary text-primary-foreground;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    box-shadow: 0 4px 14px 0 hsl(212 85% 48% / 0.35);
+  }
+
+  .submit-btn:hover:not(:disabled) {
+    background-color: hsl(var(--primary-hover));
+    box-shadow: 0 6px 20px 0 hsl(212 85% 48% / 0.45);
+    transform: translateY(-1px);
+  }
+
+  /* Success screen */
+  .success-screen {
+    @apply flex flex-col items-center justify-center min-h-screen p-8 text-center;
+  }
+
+  .success-icon {
+    @apply w-24 h-24 mb-6;
+    color: hsl(var(--success));
+    animation: success-bounce 0.6s ease-out;
+  }
+
+  @keyframes success-bounce {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Match banner */
+  .match-banner {
+    @apply bg-accent/10 border border-accent/30 rounded-xl p-4 mb-6 text-sm text-accent-foreground;
+  }
+}
+
+@layer utilities {
+  .section-border {
+    border-color: hsl(var(--section-border));
+  }
+
+  .bg-section {
+    background-color: hsl(var(--section-bg));
+  }
+
+  .text-section-header {
+    color: hsl(var(--section-header));
+  }
+
+  .border-section-border {
+    border-color: hsl(var(--section-border));
+  }
+
+  .bg-success-bg {
+    background-color: hsl(var(--success-bg));
+  }
+
+  .text-success {
+    color: hsl(var(--success));
+  }
+
+  .border-success {
+    border-color: hsl(var(--success));
+  }
+
+  .bg-primary-hover {
+    background-color: hsl(var(--primary-hover));
+  }
+
+  .border-input-focus {
+    border-color: hsl(var(--input-focus));
+  }
+
+  .text-gold {
+    color: hsl(var(--gold));
   }
 }
