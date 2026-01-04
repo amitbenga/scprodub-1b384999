@@ -235,8 +235,8 @@ export function ActorIntakeForm() {
 
   return (
     <div className="min-h-screen py-8 px-4 relative overflow-hidden">
-      {/* Microphone background decorations */}
-      <div className="absolute top-0 left-0 w-[400px] h-[600px] opacity-20 pointer-events-none hidden lg:block">
+      {/* Microphone background decorations - full height */}
+      <div className="absolute inset-y-0 left-0 w-[400px] opacity-15 pointer-events-none hidden lg:block">
         <img 
           src={microphoneBg} 
           alt="" 
@@ -244,7 +244,7 @@ export function ActorIntakeForm() {
           style={{ transform: 'scaleX(-1)' }}
         />
       </div>
-      <div className="absolute top-0 right-0 w-[400px] h-[600px] opacity-20 pointer-events-none hidden lg:block">
+      <div className="absolute inset-y-0 right-0 w-[400px] opacity-15 pointer-events-none hidden lg:block">
         <img 
           src={microphoneBg} 
           alt="" 
