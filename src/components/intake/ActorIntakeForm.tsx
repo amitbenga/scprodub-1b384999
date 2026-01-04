@@ -21,6 +21,7 @@ import { FileUpload } from "./FileUpload";
 import { SuccessScreen } from "./SuccessScreen";
 import scprodubLogo from "@/assets/scprodub-logo.png";
 import scWebsiteLogo from "@/assets/sc-website-logo.png";
+import microphoneBg from "@/assets/microphone-bg.jpg";
 
 import { uploadFile, validateImageFile, validateAudioFile } from "@/lib/file-upload";
 import {
@@ -235,23 +236,20 @@ export function ActorIntakeForm() {
   return (
     <div className="min-h-screen py-8 px-4 relative overflow-hidden">
       {/* Microphone background decorations */}
-      <div className="absolute top-0 left-0 w-48 h-96 opacity-10 pointer-events-none hidden md:block">
-        <svg viewBox="0 0 100 200" fill="currentColor" className="w-full h-full text-foreground">
-          <ellipse cx="50" cy="60" rx="30" ry="45" />
-          <rect x="45" y="105" width="10" height="50" />
-          <ellipse cx="50" cy="165" rx="25" ry="8" fill="none" stroke="currentColor" strokeWidth="3" />
-          <path d="M20 60 Q20 110 50 110" fill="none" stroke="currentColor" strokeWidth="3" />
-          <path d="M80 60 Q80 110 50 110" fill="none" stroke="currentColor" strokeWidth="3" />
-        </svg>
+      <div className="absolute top-0 left-0 w-[400px] h-[600px] opacity-20 pointer-events-none hidden lg:block">
+        <img 
+          src={microphoneBg} 
+          alt="" 
+          className="w-full h-full object-cover grayscale"
+          style={{ transform: 'scaleX(-1)' }}
+        />
       </div>
-      <div className="absolute top-0 right-0 w-48 h-96 opacity-10 pointer-events-none hidden md:block">
-        <svg viewBox="0 0 100 200" fill="currentColor" className="w-full h-full text-foreground">
-          <ellipse cx="50" cy="60" rx="30" ry="45" />
-          <rect x="45" y="105" width="10" height="50" />
-          <ellipse cx="50" cy="165" rx="25" ry="8" fill="none" stroke="currentColor" strokeWidth="3" />
-          <path d="M20 60 Q20 110 50 110" fill="none" stroke="currentColor" strokeWidth="3" />
-          <path d="M80 60 Q80 110 50 110" fill="none" stroke="currentColor" strokeWidth="3" />
-        </svg>
+      <div className="absolute top-0 right-0 w-[400px] h-[600px] opacity-20 pointer-events-none hidden lg:block">
+        <img 
+          src={microphoneBg} 
+          alt="" 
+          className="w-full h-full object-cover grayscale"
+        />
       </div>
 
       <div className="max-w-lg md:max-w-2xl mx-auto relative z-10">
