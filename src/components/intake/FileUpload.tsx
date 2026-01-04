@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Upload, X, Loader2, Image, Music } from "lucide-react";
+import { X, Image, Music, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -64,9 +64,8 @@ export function FileUpload({
           type="button"
           onClick={() => inputRef.current?.click()}
           className={cn(
-            "w-full border-2 border-dashed rounded-lg p-6 flex flex-col items-center gap-2 transition-colors",
-            "hover:border-primary hover:bg-primary/5",
-            error ? "border-destructive" : "border-border"
+            "file-upload-zone w-full flex flex-col items-center gap-2",
+            error && "border-destructive"
           )}
         >
           <Icon className="h-8 w-8 text-muted-foreground" />
@@ -75,7 +74,7 @@ export function FileUpload({
           </span>
         </button>
       ) : (
-        <div className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg">
+        <div className="flex items-center gap-3 p-3 bg-success-bg border border-success rounded-lg">
           {type === "image" && preview ? (
             <img
               src={preview}
@@ -83,8 +82,8 @@ export function FileUpload({
               className="h-12 w-12 object-cover rounded"
             />
           ) : (
-            <div className="h-12 w-12 bg-muted rounded flex items-center justify-center">
-              <Icon className="h-6 w-6 text-muted-foreground" />
+            <div className="h-12 w-12 bg-success/10 rounded flex items-center justify-center">
+              <CheckCircle className="h-6 w-6 text-success" />
             </div>
           )}
           <div className="flex-1 min-w-0">
@@ -105,9 +104,9 @@ export function FileUpload({
       )}
 
       {helper && !error && (
-        <p className="text-xs text-muted-foreground">{helper}</p>
+        <p className="form-helper">{helper}</p>
       )}
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && <p className="form-error">{error}</p>}
     </div>
   );
 }
