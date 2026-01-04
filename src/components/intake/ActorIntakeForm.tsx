@@ -20,6 +20,7 @@ import { ChipSelect } from "./ChipSelect";
 import { FileUpload } from "./FileUpload";
 import { SuccessScreen } from "./SuccessScreen";
 import scprodubLogo from "@/assets/scprodub-logo.png";
+import scWebsiteLogo from "@/assets/sc-website-logo.png";
 
 import { uploadFile, validateImageFile, validateAudioFile } from "@/lib/file-upload";
 import {
@@ -232,23 +233,44 @@ export function ActorIntakeForm() {
   const showSkillsOther = skills.includes("אחר");
 
   return (
-    <div className="min-h-screen py-8 px-4">
-      <div className="max-w-lg mx-auto">
+    <div className="min-h-screen py-8 px-4 relative overflow-hidden">
+      {/* Microphone background decorations */}
+      <div className="absolute top-0 left-0 w-48 h-96 opacity-10 pointer-events-none hidden md:block">
+        <svg viewBox="0 0 100 200" fill="currentColor" className="w-full h-full text-foreground">
+          <ellipse cx="50" cy="60" rx="30" ry="45" />
+          <rect x="45" y="105" width="10" height="50" />
+          <ellipse cx="50" cy="165" rx="25" ry="8" fill="none" stroke="currentColor" strokeWidth="3" />
+          <path d="M20 60 Q20 110 50 110" fill="none" stroke="currentColor" strokeWidth="3" />
+          <path d="M80 60 Q80 110 50 110" fill="none" stroke="currentColor" strokeWidth="3" />
+        </svg>
+      </div>
+      <div className="absolute top-0 right-0 w-48 h-96 opacity-10 pointer-events-none hidden md:block">
+        <svg viewBox="0 0 100 200" fill="currentColor" className="w-full h-full text-foreground">
+          <ellipse cx="50" cy="60" rx="30" ry="45" />
+          <rect x="45" y="105" width="10" height="50" />
+          <ellipse cx="50" cy="165" rx="25" ry="8" fill="none" stroke="currentColor" strokeWidth="3" />
+          <path d="M20 60 Q20 110 50 110" fill="none" stroke="currentColor" strokeWidth="3" />
+          <path d="M80 60 Q80 110 50 110" fill="none" stroke="currentColor" strokeWidth="3" />
+        </svg>
+      </div>
+
+      <div className="max-w-lg md:max-w-2xl mx-auto relative z-10">
         {/* Header with logo and social links */}
         <header className="flex items-center justify-between mb-8 px-2">
-          {/* Social Links - Left side */}
+          {/* Logo - Right side (RTL so appears on right) */}
+          <img src={scprodubLogo} alt="SCprodub" className="h-10" />
+
+          {/* Social Links - Left side (RTL so appears on left) */}
           <div className="flex items-center gap-2">
             <a
-              href="https://www.sc-produb.com/"
+              href="https://www.facebook.com/sc.produb.5"
               target="_blank"
               rel="noopener noreferrer"
               className="w-9 h-9 rounded-full bg-muted flex items-center justify-center hover:bg-primary/10 transition-colors"
-              aria-label="אתר SCprodub"
+              aria-label="פייסבוק"
             >
-              <svg viewBox="0 0 100 100" className="w-5 h-5" fill="currentColor">
-                <text x="50%" y="55%" textAnchor="middle" dominantBaseline="middle" fontSize="50" fontWeight="bold" fontFamily="sans-serif">
-                  sc
-                </text>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
               </svg>
             </a>
             <a
@@ -263,20 +285,15 @@ export function ActorIntakeForm() {
               </svg>
             </a>
             <a
-              href="https://www.facebook.com/sc.produb.5"
+              href="https://www.sc-produb.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full bg-muted flex items-center justify-center hover:bg-primary/10 transition-colors"
-              aria-label="פייסבוק"
+              className="w-9 h-9 rounded-full bg-muted flex items-center justify-center hover:bg-primary/10 transition-colors overflow-hidden"
+              aria-label="אתר SCprodub"
             >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-              </svg>
+              <img src={scWebsiteLogo} alt="SC" className="w-6 h-6 object-contain" />
             </a>
           </div>
-
-          {/* Logo - Right side */}
-          <img src={scprodubLogo} alt="SCprodub" className="h-10" />
         </header>
 
         {/* Title */}
