@@ -139,6 +139,7 @@ export function ActorIntakeForm() {
     }
 
     setIsSubmitting(true);
+    console.log("[ActorIntakeForm] Starting submission...");
 
     try {
       // Upload files
@@ -146,79 +147,86 @@ export function ActorIntakeForm() {
       let voiceSampleUrl: string | null = null;
 
       if (imageFile) {
+        console.log("[ActorIntakeForm] Uploading image...", imageFile.name, imageFile.type);
         const result = await uploadFile(imageFile, "images");
         if (result.error) {
-          throw new Error(result.error);
+          console.error("[ActorIntakeForm] Image upload failed:", result.error);
+          throw new Error(`שגיאה בהעלאת התמונה: ${result.error}`);
         }
         imageUrl = result.url;
+        console.log("[ActorIntakeForm] Image uploaded:", imageUrl);
       }
 
       if (voiceSampleFile) {
+        console.log("[ActorIntakeForm] Uploading voice sample...", voiceSampleFile.name, voiceSampleFile.type);
         const result = await uploadFile(voiceSampleFile, "audio");
         if (result.error) {
-          throw new Error(result.error);
+          console.error("[ActorIntakeForm] Voice sample upload failed:", result.error);
+          throw new Error(`שגיאה בהעלאת קובץ הקול: ${result.error}`);
         }
         voiceSampleUrl = result.url;
+        console.log("[ActorIntakeForm] Voice sample uploaded:", voiceSampleUrl);
       }
 
       // Prepare data
-      const formData = {
+      const insertData = {
         full_name: fullName.trim(),
         email: email.trim(),
         phone: phone.trim(),
+        normalized_email: normalizeEmail(email.trim()),
+        normalized_phone: normalizePhone(phone.trim()),
         gender,
-        birth_year: birthYear,
+        birth_year: parseInt(birthYear),
         vat_status: vatStatus,
         languages,
         languages_other: languagesOther || null,
         skills: skills.length > 0 ? skills : null,
         skills_other: skillsOther || null,
-        is_singer: isSinger || null,
-        is_course_graduate: isCourseGraduate || null,
+        is_singer: isSinger === "כן" ? true : isSinger === "לא" ? false : null,
+        is_course_graduate: isCourseGraduate === "כן" ? true : isCourseGraduate === "לא" ? false : null,
         notes: notes || null,
         image_url: imageUrl,
         voice_sample_url: voiceSampleUrl,
-      };
-
-      const insertData = {
-        full_name: formData.full_name,
-        email: formData.email,
-        phone: formData.phone,
-        normalized_email: normalizeEmail(formData.email),
-        normalized_phone: normalizePhone(formData.phone),
-        gender: formData.gender,
-        birth_year: parseInt(formData.birth_year),
-        vat_status: formData.vat_status,
-        languages: formData.languages,
-        languages_other: formData.languages_other,
-        skills: formData.skills,
-        skills_other: formData.skills_other,
-        is_singer: formData.is_singer === "כן" ? true : formData.is_singer === "לא" ? false : null,
-        is_course_graduate: formData.is_course_graduate === "כן" ? true : formData.is_course_graduate === "לא" ? false : null,
-        notes: formData.notes,
-        image_url: formData.image_url,
-        voice_sample_url: formData.voice_sample_url,
         match_status: "pending" as const,
         matched_actor_id: null,
         review_status: "pending" as const,
         raw_payload: {
-          ...formData,
+          full_name: fullName.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          gender,
+          birth_year: birthYear,
+          vat_status: vatStatus,
+          languages,
+          languages_other: languagesOther || null,
+          skills: skills.length > 0 ? skills : null,
+          skills_other: skillsOther || null,
+          is_singer: isSinger || null,
+          is_course_graduate: isCourseGraduate || null,
+          notes: notes || null,
+          image_url: imageUrl,
+          voice_sample_url: voiceSampleUrl,
           submitted_at: new Date().toISOString(),
         },
       };
 
-      const { error } = await supabase.from("actor_submissions").insert(insertData);
+      console.log("[ActorIntakeForm] Inserting data:", JSON.stringify(insertData, null, 2));
+
+      const { error, data } = await supabase.from("actor_submissions").insert(insertData).select();
 
       if (error) {
-        throw error;
+        console.error("[ActorIntakeForm] Supabase insert error:", error);
+        throw new Error(error.message);
       }
 
+      console.log("[ActorIntakeForm] Insert successful:", data);
       setIsSuccess(true);
     } catch (err) {
-      console.error("Submit error:", err);
+      console.error("[ActorIntakeForm] Submit error:", err);
+      const errorMessage = err instanceof Error ? err.message : "נא לנסות שוב מאוחר יותר";
       toast({
         title: "שגיאה בשליחת הטופס",
-        description: "נא לנסות שוב מאוחר יותר",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
