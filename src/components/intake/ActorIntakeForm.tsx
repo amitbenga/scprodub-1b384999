@@ -236,26 +236,26 @@ export function ActorIntakeForm() {
   return (
     <div className="min-h-screen relative">
       {/* Fixed microphone background decorations */}
-      <div className="fixed top-0 left-0 h-screen w-[350px] opacity-20 pointer-events-none hidden lg:block z-0">
+      <div className="fixed top-0 left-0 h-screen w-[400px] opacity-25 pointer-events-none hidden lg:block z-0">
         <img 
           src={microphoneBg} 
           alt="" 
-          className="w-full h-full object-contain object-top grayscale"
+          className="w-full h-full object-cover object-center grayscale"
           style={{ transform: 'scaleX(-1)' }}
         />
       </div>
-      <div className="fixed top-0 right-0 h-screen w-[350px] opacity-20 pointer-events-none hidden lg:block z-0">
+      <div className="fixed top-0 right-0 h-screen w-[400px] opacity-25 pointer-events-none hidden lg:block z-0">
         <img 
           src={microphoneBg} 
           alt="" 
-          className="w-full h-full object-contain object-top grayscale"
+          className="w-full h-full object-cover object-center grayscale"
         />
       </div>
 
-      {/* White fade gradient overlay for center content */}
+      {/* Soft radial fade overlay for center content */}
       <div className="fixed inset-0 pointer-events-none z-[1] hidden lg:block"
         style={{
-          background: 'linear-gradient(to right, transparent 0%, transparent 15%, rgba(255,255,255,0.85) 25%, rgba(255,255,255,0.95) 35%, rgba(255,255,255,0.95) 65%, rgba(255,255,255,0.85) 75%, transparent 85%, transparent 100%)'
+          background: 'radial-gradient(ellipse 60% 80% at 50% 50%, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.9) 40%, rgba(255,255,255,0.6) 70%, transparent 100%)'
         }}
       />
 
