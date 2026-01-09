@@ -35,14 +35,13 @@ import {
 const LANGUAGES = ["עברית", "אנגלית", "ערבית", "רוסית", "צרפתית", "אחר"];
 const SKILLS = ["דיבוב", "קריינות", "משחק", "שירה", "קומדיה", "אחר"];
 const GENDERS = [
-  { value: "זכר", label: "זכר" },
-  { value: "נקבה", label: "נקבה" },
-  { value: "אחר", label: "אחר" },
+  { value: "male", label: "זכר" },
+  { value: "female", label: "נקבה" },
 ];
 const VAT_STATUSES = [
-  { value: "עוסק פטור", label: "עוסק פטור" },
-  { value: "עוסק מורשה", label: "עוסק מורשה" },
-  { value: "שכר אמנים", label: "שכר אמנים" },
+  { value: "ptor", label: "עוסק פטור" },
+  { value: "murshe", label: "עוסק מורשה" },
+  { value: "artist_salary", label: "שכר אמנים" },
 ];
 
 const BIRTH_YEARS = Array.from({ length: 71 }, (_, i) => 2010 - i);
