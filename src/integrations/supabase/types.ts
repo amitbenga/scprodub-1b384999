@@ -269,17 +269,23 @@ export type Database = {
       }
       folders: {
         Row: {
+          color: string | null
           created_at: string | null
+          description: string | null
           id: string
           name: string
         }
         Insert: {
+          color?: string | null
           created_at?: string | null
+          description?: string | null
           id?: string
           name: string
         }
         Update: {
+          color?: string | null
           created_at?: string | null
+          description?: string | null
           id?: string
           name?: string
         }
@@ -377,6 +383,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          role: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          full_name: string
+          id: string
+          role: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          role?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
