@@ -209,16 +209,19 @@ export function ActorIntakeForm() {
         },
       };
 
-      console.log("[ActorIntakeForm] Inserting data:", JSON.stringify(insertData, null, 2));
+      // NOTE: Do not call .select() here.
+      // RLS allows public INSERTs but SELECT is restricted to admins.
+      // Using .select() makes PostgREST try to return the inserted row and fails under RLS.
+      console.log("[ActorIntakeForm] Inserting data");
 
-      const { error, data } = await supabase.from("actor_submissions").insert(insertData).select();
+      const { error } = await supabase.from("actor_submissions").insert(insertData);
 
       if (error) {
         console.error("[ActorIntakeForm] Supabase insert error:", error);
         throw new Error(error.message);
       }
 
-      console.log("[ActorIntakeForm] Insert successful:", data);
+      console.log("[ActorIntakeForm] Insert successful");
       setIsSuccess(true);
     } catch (err) {
       console.error("[ActorIntakeForm] Submit error:", err);
