@@ -384,6 +384,148 @@ export type Database = {
           },
         ]
       }
+      project_scripts: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          file_size_bytes: number | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          processed_at: string | null
+          processing_error: string | null
+          processing_status: string
+          project_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          processed_at?: string | null
+          processing_error?: string | null
+          processing_status?: string
+          project_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          processed_at?: string | null
+          processing_error?: string | null
+          processing_status?: string
+          project_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_scripts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "casting_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      script_casting_warnings: {
+        Row: {
+          created_at: string | null
+          id: string
+          notes: string | null
+          project_id: string
+          role_1_name: string
+          role_2_name: string
+          scene_reference: string | null
+          warning_type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          project_id: string
+          role_1_name: string
+          role_2_name: string
+          scene_reference?: string | null
+          warning_type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          project_id?: string
+          role_1_name?: string
+          role_2_name?: string
+          scene_reference?: string | null
+          warning_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "script_casting_warnings_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "casting_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      script_extracted_roles: {
+        Row: {
+          created_at: string | null
+          first_appearance_script: string | null
+          id: string
+          notes: string | null
+          project_id: string
+          replicas_count: number | null
+          role_name: string
+          role_type: string | null
+          script_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          first_appearance_script?: string | null
+          id?: string
+          notes?: string | null
+          project_id: string
+          replicas_count?: number | null
+          role_name: string
+          role_type?: string | null
+          script_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          first_appearance_script?: string | null
+          id?: string
+          notes?: string | null
+          project_id?: string
+          replicas_count?: number | null
+          role_name?: string
+          role_type?: string | null
+          script_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "script_extracted_roles_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "casting_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "script_extracted_roles_script_id_fkey"
+            columns: ["script_id"]
+            isOneToOne: false
+            referencedRelation: "project_scripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           created_at: string | null
