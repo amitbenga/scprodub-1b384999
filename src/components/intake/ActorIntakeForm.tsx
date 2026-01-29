@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Loader2, User, Briefcase, Languages, Sparkles, FileText, Image } from "lucide-react";
+import { Loader2, User, Briefcase, Languages, Sparkles, FileText, Image, Music, Plus, X } from "lucide-react";
 
 import { FormSection } from "./FormSection";
 import { ChipSelect } from "./ChipSelect";
@@ -33,7 +34,7 @@ import {
 } from "@/lib/form-utils";
 
 const LANGUAGES = ["עברית", "אנגלית", "ערבית", "רוסית", "צרפתית", "אחר"];
-const SKILLS = ["דיבוב", "קריינות", "משחק", "שירה", "קומדיה", "אחר"];
+const SKILLS = ["קריינות", "מבטא רוסי", "כל מבטא אפשרי", "אחר"];
 const GENDERS = [
   { value: "male", label: "זכר" },
   { value: "female", label: "נקבה" },
@@ -44,7 +45,28 @@ const VAT_STATUSES = [
   { value: "artist_salary", label: "שכר אמנים" },
 ];
 
+const SINGING_LEVELS = [
+  { value: "", label: "לא רלוונטי" },
+  { value: "basic", label: "שירה ברמה בסיסית" },
+  { value: "good", label: "שירה ברמה טובה" },
+  { value: "high", label: "שירה ברמה גבוהה" },
+];
+
+const SINGING_STYLES = [
+  { value: "musical", label: "מוזיקל" },
+  { value: "classic", label: "קלאסי" },
+  { value: "pop", label: "פופ" },
+  { value: "opera", label: "אופרה" },
+  { value: "jazz", label: "ג׳אז" },
+  { value: "rock", label: "רוק" },
+];
+
 const BIRTH_YEARS = Array.from({ length: 71 }, (_, i) => 2010 - i);
+
+interface OtherSingingStyle {
+  name: string;
+  level: string;
+}
 
 interface FormErrors {
   full_name?: string;
@@ -63,18 +85,30 @@ export function ActorIntakeForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // Form state
+  // Form state - Personal
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [gender, setGender] = useState("");
   const [birthYear, setBirthYear] = useState<string>("");
+  const [city, setCity] = useState("");
+  
+  // Dubbing experience
+  const [dubbingExperienceYears, setDubbingExperienceYears] = useState<string>("0");
+  
+  // Singing
+  const [singingLevel, setSingingLevel] = useState<string>("");
+  const [singingStyles, setSingingStyles] = useState<string[]>([]);
+  const [singingStylesOther, setSingingStylesOther] = useState<OtherSingingStyle[]>([]);
+  const [newOtherStyleName, setNewOtherStyleName] = useState("");
+  const [newOtherStyleLevel, setNewOtherStyleLevel] = useState<"basic" | "good" | "high">("basic");
+  
+  // Other fields
   const [vatStatus, setVatStatus] = useState("");
   const [languages, setLanguages] = useState<string[]>([]);
   const [languagesOther, setLanguagesOther] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [skillsOther, setSkillsOther] = useState("");
-  const [isSinger, setIsSinger] = useState<string>("");
   const [isCourseGraduate, setIsCourseGraduate] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -125,6 +159,21 @@ export function ActorIntakeForm() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const addOtherSingingStyle = () => {
+    if (newOtherStyleName.trim()) {
+      setSingingStylesOther([
+        ...singingStylesOther,
+        { name: newOtherStyleName.trim(), level: newOtherStyleLevel }
+      ]);
+      setNewOtherStyleName("");
+      setNewOtherStyleLevel("basic");
+    }
+  };
+
+  const removeOtherSingingStyle = (index: number) => {
+    setSingingStylesOther(singingStylesOther.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -167,7 +216,10 @@ export function ActorIntakeForm() {
         console.log("[ActorIntakeForm] Voice sample uploaded:", voiceSampleUrl);
       }
 
-      // Prepare data
+      // Determine is_singer based on singing level
+      const isSingerValue = singingLevel && singingLevel !== "none" ? true : false;
+
+      // Prepare data for actor_submissions table
       const insertData = {
         full_name: fullName.trim(),
         email: email.trim(),
@@ -181,7 +233,7 @@ export function ActorIntakeForm() {
         languages_other: languagesOther || null,
         skills: skills.length > 0 ? skills : null,
         skills_other: skillsOther || null,
-        is_singer: isSinger === "כן" ? true : isSinger === "לא" ? false : null,
+        is_singer: isSingerValue,
         is_course_graduate: isCourseGraduate === "כן" ? true : isCourseGraduate === "לא" ? false : null,
         notes: notes || null,
         image_url: imageUrl,
@@ -195,26 +247,29 @@ export function ActorIntakeForm() {
           phone: phone.trim(),
           gender,
           birth_year: birthYear,
+          city: city || null,
           vat_status: vatStatus,
           languages,
           languages_other: languagesOther || null,
           skills: skills.length > 0 ? skills : null,
           skills_other: skillsOther || null,
-          is_singer: isSinger || null,
+          dubbing_experience_years: parseInt(dubbingExperienceYears) || 0,
+          singing_level: singingLevel && singingLevel !== "none" ? singingLevel : null,
+          singing_styles: singingStyles,
+          singing_styles_other: singingStylesOther.map(s => ({ name: s.name, level: s.level })),
           is_course_graduate: isCourseGraduate || null,
           notes: notes || null,
           image_url: imageUrl,
           voice_sample_url: voiceSampleUrl,
           submitted_at: new Date().toISOString(),
-        },
+        } as Json,
       };
 
       // NOTE: Do not call .select() here.
       // RLS allows public INSERTs but SELECT is restricted to admins.
-      // Using .select() makes PostgREST try to return the inserted row and fails under RLS.
       console.log("[ActorIntakeForm] Inserting data");
 
-      const { error } = await supabase.from("actor_submissions").insert(insertData);
+      const { error } = await supabase.from("actor_submissions").insert([insertData]);
 
       if (error) {
         console.error("[ActorIntakeForm] Supabase insert error:", error);
@@ -242,6 +297,7 @@ export function ActorIntakeForm() {
 
   const showLanguagesOther = languages.includes("אחר");
   const showSkillsOther = skills.includes("אחר");
+  const showSingingStyles = !!singingLevel;
 
   return (
     <div className="min-h-screen relative">
@@ -337,37 +393,6 @@ export function ActorIntakeForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">אימייל *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={errors.email ? "border-destructive" : ""}
-              />
-              {errors.email && (
-                <p className="text-xs text-destructive">{errors.email}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">טלפון *</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className={errors.phone ? "border-destructive" : ""}
-              />
-              {errors.phone && (
-                <p className="text-xs text-destructive">{errors.phone}</p>
-              )}
-            </div>
-          </FormSection>
-
-          {/* Section 2: Professional Info */}
-          <FormSection title="מידע מקצועי" icon={Briefcase}>
-            <div className="space-y-2">
               <Label>מגדר *</Label>
               <Select value={gender} onValueChange={setGender}>
                 <SelectTrigger className={errors.gender ? "border-destructive" : ""}>
@@ -406,52 +431,176 @@ export function ActorIntakeForm() {
             </div>
 
             <div className="space-y-2">
-              <Label>סטטוס עוסק *</Label>
-              <Select value={vatStatus} onValueChange={setVatStatus}>
-                <SelectTrigger className={errors.vat_status ? "border-destructive" : ""}>
+              <Label htmlFor="phone">טלפון *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className={errors.phone ? "border-destructive" : ""}
+              />
+              {errors.phone && (
+                <p className="text-xs text-destructive">{errors.phone}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">אימייל *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={errors.email ? "border-destructive" : ""}
+              />
+              {errors.email && (
+                <p className="text-xs text-destructive">{errors.email}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="city">עיר</Label>
+              <Input
+                id="city"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="עיר מגורים"
+              />
+            </div>
+          </FormSection>
+
+          {/* Section 2: Dubbing Experience */}
+          <FormSection title="ניסיון בדיבוב" icon={Briefcase}>
+            <div className="space-y-2">
+              <Label htmlFor="dubbingExperience">ניסיון בדיבוב (בשנים)</Label>
+              <Input
+                id="dubbingExperience"
+                type="number"
+                min="0"
+                max="50"
+                value={dubbingExperienceYears}
+                onChange={(e) => setDubbingExperienceYears(e.target.value)}
+                className="w-32"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>בוגר/ת קורס דיבוב</Label>
+              <RadioGroup
+                value={isCourseGraduate}
+                onValueChange={setIsCourseGraduate}
+                className="flex gap-4"
+              >
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="כן" id="course-yes" />
+                  <Label htmlFor="course-yes" className="font-normal cursor-pointer">
+                    כן
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="לא" id="course-no" />
+                  <Label htmlFor="course-no" className="font-normal cursor-pointer">
+                    לא
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </FormSection>
+
+          {/* Section 3: Singing */}
+          <FormSection title="שירה" icon={Music}>
+            <div className="space-y-2">
+              <Label>רמת שירה</Label>
+              <Select value={singingLevel} onValueChange={setSingingLevel}>
+                <SelectTrigger>
                   <SelectValue placeholder="בחירה..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {VAT_STATUSES.map((vs) => (
-                    <SelectItem key={vs.value} value={vs.value}>
-                      {vs.label}
+                  {SINGING_LEVELS.map((level) => (
+                    <SelectItem key={level.value || "none"} value={level.value || "none"}>
+                      {level.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {errors.vat_status && (
-                <p className="text-xs text-destructive">{errors.vat_status}</p>
-              )}
-            </div>
-          </FormSection>
-
-          {/* Section 3: Languages */}
-          <FormSection title="שפות" icon={Languages}>
-            <div className="space-y-2">
-              <Label>שפות *</Label>
-              <ChipSelect
-                options={LANGUAGES}
-                selected={languages}
-                onChange={setLanguages}
-              />
-              {errors.languages && (
-                <p className="text-xs text-destructive">{errors.languages}</p>
-              )}
             </div>
 
-            {showLanguagesOther && (
-              <div className="space-y-2">
-                <Label htmlFor="languagesOther">שפה אחרת</Label>
-                <Input
-                  id="languagesOther"
-                  value={languagesOther}
-                  onChange={(e) => setLanguagesOther(e.target.value)}
-                  placeholder="פרט את השפה..."
-                />
-                {languages.includes("אחר") && !languagesOther && (
-                  <p className="text-xs text-gold">בחרת ״אחר״ — נא לציין פרטים</p>
-                )}
-              </div>
+            {showSingingStyles && (
+              <>
+                <div className="space-y-2">
+                  <Label>סגנונות שירה</Label>
+                  <ChipSelect
+                    options={SINGING_STYLES.map(s => s.label)}
+                    selected={singingStyles.map(v => SINGING_STYLES.find(s => s.value === v)?.label || v)}
+                    onChange={(selected) => {
+                      const values = selected.map(label => 
+                        SINGING_STYLES.find(s => s.label === label)?.value || label
+                      );
+                      setSingingStyles(values);
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label>סגנונות שירה נוספים</Label>
+                  
+                  {/* List of added other styles */}
+                  {singingStylesOther.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {singingStylesOther.map((style, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm"
+                        >
+                          <span>{style.name}</span>
+                          <span className="text-xs opacity-70">
+                            ({SINGING_LEVELS.find(l => l.value === style.level)?.label || style.level})
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeOtherSingingStyle(index)}
+                            className="mr-1 hover:text-destructive"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add new other style */}
+                  <div className="flex flex-wrap gap-2 items-end">
+                    <div className="flex-1 min-w-[150px]">
+                      <Input
+                        value={newOtherStyleName}
+                        onChange={(e) => setNewOtherStyleName(e.target.value)}
+                        placeholder="שם הסגנון"
+                      />
+                    </div>
+                    <div className="w-40">
+                      <Select value={newOtherStyleLevel} onValueChange={(v) => setNewOtherStyleLevel(v as "basic" | "good" | "high")}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="basic">רמה בסיסית</SelectItem>
+                          <SelectItem value="good">רמה טובה</SelectItem>
+                          <SelectItem value="high">רמה גבוהה</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={addOtherSingingStyle}
+                      disabled={!newOtherStyleName.trim()}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </>
             )}
           </FormSection>
 
@@ -482,52 +631,60 @@ export function ActorIntakeForm() {
             )}
           </FormSection>
 
-          {/* Section 5: Additional Info */}
-          <FormSection title="מידע משלים" icon={FileText}>
+          {/* Section 5: Languages */}
+          <FormSection title="שפות" icon={Languages}>
             <div className="space-y-2">
-              <Label>זמר/ת</Label>
-              <RadioGroup
-                value={isSinger}
-                onValueChange={setIsSinger}
-                className="flex gap-4"
-              >
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="כן" id="singer-yes" />
-                  <Label htmlFor="singer-yes" className="font-normal cursor-pointer">
-                    כן
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="לא" id="singer-no" />
-                  <Label htmlFor="singer-no" className="font-normal cursor-pointer">
-                    לא
-                  </Label>
-                </div>
-              </RadioGroup>
+              <Label>שפות *</Label>
+              <ChipSelect
+                options={LANGUAGES}
+                selected={languages}
+                onChange={setLanguages}
+              />
+              {errors.languages && (
+                <p className="text-xs text-destructive">{errors.languages}</p>
+              )}
             </div>
 
-            <div className="space-y-2">
-              <Label>בוגר/ת קורס</Label>
-              <RadioGroup
-                value={isCourseGraduate}
-                onValueChange={setIsCourseGraduate}
-                className="flex gap-4"
-              >
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="כן" id="course-yes" />
-                  <Label htmlFor="course-yes" className="font-normal cursor-pointer">
-                    כן
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="לא" id="course-no" />
-                  <Label htmlFor="course-no" className="font-normal cursor-pointer">
-                    לא
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
+            {showLanguagesOther && (
+              <div className="space-y-2">
+                <Label htmlFor="languagesOther">שפה אחרת</Label>
+                <Input
+                  id="languagesOther"
+                  value={languagesOther}
+                  onChange={(e) => setLanguagesOther(e.target.value)}
+                  placeholder="פרט את השפה..."
+                />
+                {languages.includes("אחר") && !languagesOther && (
+                  <p className="text-xs text-gold">בחרת ״אחר״ — נא לציין פרטים</p>
+                )}
+              </div>
+            )}
+          </FormSection>
 
+          {/* Section 6: VAT Status */}
+          <FormSection title="סטטוס עוסק" icon={FileText}>
+            <div className="space-y-2">
+              <Label>סטטוס עוסק *</Label>
+              <Select value={vatStatus} onValueChange={setVatStatus}>
+                <SelectTrigger className={errors.vat_status ? "border-destructive" : ""}>
+                  <SelectValue placeholder="בחירה..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {VAT_STATUSES.map((vs) => (
+                    <SelectItem key={vs.value} value={vs.value}>
+                      {vs.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.vat_status && (
+                <p className="text-xs text-destructive">{errors.vat_status}</p>
+              )}
+            </div>
+          </FormSection>
+
+          {/* Section 7: Notes */}
+          <FormSection title="הערות" icon={FileText}>
             <div className="space-y-2">
               <Label htmlFor="notes">הערות</Label>
               <Textarea
@@ -540,7 +697,7 @@ export function ActorIntakeForm() {
             </div>
           </FormSection>
 
-          {/* Section 6: Media */}
+          {/* Section 8: Media */}
           <FormSection title="מדיה (מומלץ)" icon={Image}>
             <div className="space-y-2">
               <Label>תמונה</Label>

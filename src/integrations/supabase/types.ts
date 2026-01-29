@@ -108,6 +108,7 @@ export type Database = {
           birth_year: number
           city: string | null
           created_at: string | null
+          dubbing_experience_years: number | null
           email: string | null
           full_name: string
           gender: string
@@ -119,6 +120,9 @@ export type Database = {
           notes: string | null
           other_lang_text: string | null
           phone: string
+          singing_level: string | null
+          singing_styles: Json | null
+          singing_styles_other: Json | null
           skills: Json | null
           updated_at: string | null
           vat_status: string
@@ -128,6 +132,7 @@ export type Database = {
           birth_year: number
           city?: string | null
           created_at?: string | null
+          dubbing_experience_years?: number | null
           email?: string | null
           full_name: string
           gender: string
@@ -139,6 +144,9 @@ export type Database = {
           notes?: string | null
           other_lang_text?: string | null
           phone: string
+          singing_level?: string | null
+          singing_styles?: Json | null
+          singing_styles_other?: Json | null
           skills?: Json | null
           updated_at?: string | null
           vat_status: string
@@ -148,6 +156,7 @@ export type Database = {
           birth_year?: number
           city?: string | null
           created_at?: string | null
+          dubbing_experience_years?: number | null
           email?: string | null
           full_name?: string
           gender?: string
@@ -159,6 +168,9 @@ export type Database = {
           notes?: string | null
           other_lang_text?: string | null
           phone?: string
+          singing_level?: string | null
+          singing_styles?: Json | null
+          singing_styles_other?: Json | null
           skills?: Json | null
           updated_at?: string | null
           vat_status?: string
