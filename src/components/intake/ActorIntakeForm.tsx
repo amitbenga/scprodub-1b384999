@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -109,6 +110,7 @@ export function ActorIntakeForm() {
   const [languagesOther, setLanguagesOther] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [skillsOther, setSkillsOther] = useState("");
+  const [isCourseGraduate, setIsCourseGraduate] = useState(false);
   const [studiedAt, setStudiedAt] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -234,7 +236,7 @@ export function ActorIntakeForm() {
         skills: skills.length > 0 ? skills : null,
         skills_other: skillsOther || null,
         is_singer: isSingerValue,
-        is_course_graduate: studiedAt.trim() ? true : false,
+        is_course_graduate: isCourseGraduate,
         notes: notes || null,
         image_url: imageUrl,
         voice_sample_url: voiceSampleUrl,
@@ -482,6 +484,17 @@ export function ActorIntakeForm() {
                 onChange={(e) => setDubbingExperienceYears(e.target.value)}
                 className="w-32"
               />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="isCourseGraduate"
+                checked={isCourseGraduate}
+                onCheckedChange={(checked) => setIsCourseGraduate(checked === true)}
+              />
+              <Label htmlFor="isCourseGraduate" className="font-normal cursor-pointer">
+                בוגר/ת קורס דיבוב
+              </Label>
             </div>
 
             <div className="space-y-2">
