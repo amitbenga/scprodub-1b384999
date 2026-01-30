@@ -64,6 +64,11 @@ const SINGING_STYLES = [
 
 const BIRTH_YEARS = Array.from({ length: 71 }, (_, i) => 2010 - i);
 
+interface SingingStyleWithLevel {
+  style: string;
+  level: string;
+}
+
 interface OtherSingingStyle {
   name: string;
   level: string;
@@ -99,10 +104,14 @@ export function ActorIntakeForm() {
   
   // Singing
   const [singingLevel, setSingingLevel] = useState<string>("");
-  const [singingStyles, setSingingStyles] = useState<string[]>([]);
+  const [singingStyles, setSingingStyles] = useState<SingingStyleWithLevel[]>([]);
   const [singingStylesOther, setSingingStylesOther] = useState<OtherSingingStyle[]>([]);
   const [newOtherStyleName, setNewOtherStyleName] = useState("");
   const [newOtherStyleLevel, setNewOtherStyleLevel] = useState<"basic" | "good" | "high">("basic");
+  
+  // For adding new style with level
+  const [pendingStyle, setPendingStyle] = useState<string | null>(null);
+  const [pendingStyleLevel, setPendingStyleLevel] = useState<"basic" | "good" | "high">("basic");
   
   // Other fields
   const [vatStatus, setVatStatus] = useState("");
@@ -257,7 +266,7 @@ export function ActorIntakeForm() {
           skills_other: skillsOther || null,
           dubbing_experience_years: parseInt(dubbingExperienceYears) || 0,
           singing_level: singingLevel && singingLevel !== "none" ? singingLevel : null,
-          singing_styles: singingStyles,
+          singing_styles: singingStyles.map(s => ({ style: s.style, level: s.level })),
           singing_styles_other: singingStylesOther.map(s => ({ name: s.name, level: s.level })),
           studied_at: studiedAt.trim() || null,
           notes: notes || null,
@@ -528,18 +537,98 @@ export function ActorIntakeForm() {
 
             {showSingingStyles && (
               <>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label>סגנונות שירה</Label>
-                  <ChipSelect
-                    options={SINGING_STYLES.map(s => s.label)}
-                    selected={singingStyles.map(v => SINGING_STYLES.find(s => s.value === v)?.label || v)}
-                    onChange={(selected) => {
-                      const values = selected.map(label => 
-                        SINGING_STYLES.find(s => s.label === label)?.value || label
-                      );
-                      setSingingStyles(values);
-                    }}
-                  />
+                  
+                  {/* Selected styles with levels */}
+                  {singingStyles.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {singingStyles.map((item, index) => {
+                        const styleLabel = SINGING_STYLES.find(s => s.value === item.style)?.label || item.style;
+                        const levelLabel = SINGING_LEVELS.find(l => l.value === item.level)?.label || item.level;
+                        return (
+                          <div
+                            key={index}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm"
+                          >
+                            <span>{styleLabel}</span>
+                            <span className="text-xs opacity-70">({levelLabel})</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSingingStyles(prev => prev.filter((_, i) => i !== index));
+                              }}
+                              className="mr-1 hover:text-destructive"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Style selection chips */}
+                  <div className="flex flex-wrap gap-2">
+                    {SINGING_STYLES
+                      .filter(style => !singingStyles.some(s => s.style === style.value))
+                      .map(style => (
+                        <button
+                          key={style.value}
+                          type="button"
+                          onClick={() => setPendingStyle(style.value)}
+                          className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                            pendingStyle === style.value 
+                              ? "bg-primary text-primary-foreground border-primary" 
+                              : "bg-background hover:bg-muted border-input"
+                          }`}
+                        >
+                          {style.label}
+                        </button>
+                      ))}
+                  </div>
+
+                  {/* Level selection for pending style */}
+                  {pendingStyle && (
+                    <div className="flex flex-wrap gap-2 items-center p-3 bg-muted rounded-lg">
+                      <span className="text-sm font-medium">
+                        {SINGING_STYLES.find(s => s.value === pendingStyle)?.label}:
+                      </span>
+                      <Select value={pendingStyleLevel} onValueChange={(v) => setPendingStyleLevel(v as "basic" | "good" | "high")}>
+                        <SelectTrigger className="w-36">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="basic">רמה בסיסית</SelectItem>
+                          <SelectItem value="good">רמה טובה</SelectItem>
+                          <SelectItem value="high">רמה גבוהה</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => {
+                          setSingingStyles(prev => [...prev, { style: pendingStyle, level: pendingStyleLevel }]);
+                          setPendingStyle(null);
+                          setPendingStyleLevel("basic");
+                        }}
+                      >
+                        <Plus className="h-4 w-4 ml-1" />
+                        הוסף
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setPendingStyle(null);
+                          setPendingStyleLevel("basic");
+                        }}
+                      >
+                        ביטול
+                      </Button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-3">
