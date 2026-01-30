@@ -109,7 +109,7 @@ export function ActorIntakeForm() {
   const [languagesOther, setLanguagesOther] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [skillsOther, setSkillsOther] = useState("");
-  const [isCourseGraduate, setIsCourseGraduate] = useState<string>("");
+  const [studiedAt, setStudiedAt] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [voiceSampleFile, setVoiceSampleFile] = useState<File | null>(null);
@@ -234,7 +234,7 @@ export function ActorIntakeForm() {
         skills: skills.length > 0 ? skills : null,
         skills_other: skillsOther || null,
         is_singer: isSingerValue,
-        is_course_graduate: isCourseGraduate === "כן" ? true : isCourseGraduate === "לא" ? false : null,
+        is_course_graduate: studiedAt.trim() ? true : false,
         notes: notes || null,
         image_url: imageUrl,
         voice_sample_url: voiceSampleUrl,
@@ -257,7 +257,7 @@ export function ActorIntakeForm() {
           singing_level: singingLevel && singingLevel !== "none" ? singingLevel : null,
           singing_styles: singingStyles,
           singing_styles_other: singingStylesOther.map(s => ({ name: s.name, level: s.level })),
-          is_course_graduate: isCourseGraduate || null,
+          studied_at: studiedAt.trim() || null,
           notes: notes || null,
           image_url: imageUrl,
           voice_sample_url: voiceSampleUrl,
@@ -485,25 +485,13 @@ export function ActorIntakeForm() {
             </div>
 
             <div className="space-y-2">
-              <Label>בוגר/ת קורס דיבוב</Label>
-              <RadioGroup
-                value={isCourseGraduate}
-                onValueChange={setIsCourseGraduate}
-                className="flex gap-4"
-              >
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="כן" id="course-yes" />
-                  <Label htmlFor="course-yes" className="font-normal cursor-pointer">
-                    כן
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="לא" id="course-no" />
-                  <Label htmlFor="course-no" className="font-normal cursor-pointer">
-                    לא
-                  </Label>
-                </div>
-              </RadioGroup>
+              <Label htmlFor="studiedAt">לימודים</Label>
+              <Input
+                id="studiedAt"
+                value={studiedAt}
+                onChange={(e) => setStudiedAt(e.target.value)}
+                placeholder="שם הקורס / המוסד הלימודי (אם רלוונטי)"
+              />
             </div>
           </FormSection>
 
