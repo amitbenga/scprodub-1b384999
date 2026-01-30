@@ -120,7 +120,6 @@ export type Database = {
           notes: string | null
           other_lang_text: string | null
           phone: string
-          singing_level: string | null
           singing_styles: Json | null
           singing_styles_other: Json | null
           skills: Json | null
@@ -144,7 +143,6 @@ export type Database = {
           notes?: string | null
           other_lang_text?: string | null
           phone: string
-          singing_level?: string | null
           singing_styles?: Json | null
           singing_styles_other?: Json | null
           skills?: Json | null
@@ -168,7 +166,6 @@ export type Database = {
           notes?: string | null
           other_lang_text?: string | null
           phone?: string
-          singing_level?: string | null
           singing_styles?: Json | null
           singing_styles_other?: Json | null
           skills?: Json | null

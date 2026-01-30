@@ -26,6 +26,7 @@ import scWebsiteLogo from "@/assets/sc-website-logo.png";
 import microphoneBg from "@/assets/microphone-bg.jpg";
 
 import { uploadFile, validateImageFile, validateAudioFile } from "@/lib/file-upload";
+import { logger } from "@/lib/logger";
 import {
   normalizeEmail,
   normalizePhone,
@@ -198,7 +199,7 @@ export function ActorIntakeForm() {
     }
 
     setIsSubmitting(true);
-    console.log("[ActorIntakeForm] Starting submission...");
+    logger.log("[ActorIntakeForm] Starting submission...");
 
     try {
       // Upload files
@@ -206,25 +207,25 @@ export function ActorIntakeForm() {
       let voiceSampleUrl: string | null = null;
 
       if (imageFile) {
-        console.log("[ActorIntakeForm] Uploading image...", imageFile.name, imageFile.type);
+        logger.log("[ActorIntakeForm] Uploading image...");
         const result = await uploadFile(imageFile, "images");
         if (result.error) {
-          console.error("[ActorIntakeForm] Image upload failed:", result.error);
+          logger.error("[ActorIntakeForm] Image upload failed");
           throw new Error(`שגיאה בהעלאת התמונה: ${result.error}`);
         }
         imageUrl = result.url;
-        console.log("[ActorIntakeForm] Image uploaded:", imageUrl);
+        logger.log("[ActorIntakeForm] Image uploaded successfully");
       }
 
       if (voiceSampleFile) {
-        console.log("[ActorIntakeForm] Uploading voice sample...", voiceSampleFile.name, voiceSampleFile.type);
+        logger.log("[ActorIntakeForm] Uploading voice sample...");
         const result = await uploadFile(voiceSampleFile, "audio");
         if (result.error) {
-          console.error("[ActorIntakeForm] Voice sample upload failed:", result.error);
+          logger.error("[ActorIntakeForm] Voice sample upload failed");
           throw new Error(`שגיאה בהעלאת קובץ הקול: ${result.error}`);
         }
         voiceSampleUrl = result.url;
-        console.log("[ActorIntakeForm] Voice sample uploaded:", voiceSampleUrl);
+        logger.log("[ActorIntakeForm] Voice sample uploaded successfully");
       }
 
       // Determine is_singer based on singing level
@@ -278,19 +279,19 @@ export function ActorIntakeForm() {
 
       // NOTE: Do not call .select() here.
       // RLS allows public INSERTs but SELECT is restricted to admins.
-      console.log("[ActorIntakeForm] Inserting data");
+      logger.log("[ActorIntakeForm] Inserting data");
 
       const { error } = await supabase.from("actor_submissions").insert([insertData]);
 
       if (error) {
-        console.error("[ActorIntakeForm] Supabase insert error:", error);
+        logger.error("[ActorIntakeForm] Supabase insert error");
         throw new Error(error.message);
       }
 
-      console.log("[ActorIntakeForm] Insert successful");
+      logger.log("[ActorIntakeForm] Insert successful");
       setIsSuccess(true);
     } catch (err) {
-      console.error("[ActorIntakeForm] Submit error:", err);
+      logger.error("[ActorIntakeForm] Submit error");
       const errorMessage = err instanceof Error ? err.message : "נא לנסות שוב מאוחר יותר";
       toast({
         title: "שגיאה בשליחת הטופס",
