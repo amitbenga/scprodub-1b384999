@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -95,7 +96,7 @@ export async function uploadFile(
       });
 
     if (uploadError) {
-      console.error("Upload error:", uploadError);
+      logger.error("Upload error:", uploadError);
       return { url: null, error: "שגיאה בהעלאת הקובץ" };
     }
 
@@ -105,7 +106,7 @@ export async function uploadFile(
 
     return { url: urlData.publicUrl, error: null };
   } catch (err) {
-    console.error("Upload exception:", err);
+    logger.error("Upload exception:", err);
     return { url: null, error: "שגיאה בהעלאת הקובץ" };
   }
 }
