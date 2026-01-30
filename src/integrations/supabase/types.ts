@@ -363,27 +363,46 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          parent_role_id: string | null
           project_id: string
+          replicas_count: number | null
           replicas_needed: number | null
           role_name: string
+          role_name_normalized: string | null
+          source: string | null
         }
         Insert: {
           created_at?: string | null
           description?: string | null
           id?: string
+          parent_role_id?: string | null
           project_id: string
+          replicas_count?: number | null
           replicas_needed?: number | null
           role_name: string
+          role_name_normalized?: string | null
+          source?: string | null
         }
         Update: {
           created_at?: string | null
           description?: string | null
           id?: string
+          parent_role_id?: string | null
           project_id?: string
+          replicas_count?: number | null
           replicas_needed?: number | null
           role_name?: string
+          role_name_normalized?: string | null
+          source?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "project_roles_parent_role_id_fkey"
+            columns: ["parent_role_id"]
+            isOneToOne: false
+            referencedRelation: "project_roles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "project_roles_project_id_fkey"
             columns: ["project_id"]
@@ -439,6 +458,122 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "casting_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_castings: {
+        Row: {
+          actor_id: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          project_id: string | null
+          replicas_final: number | null
+          replicas_planned: number | null
+          role_id: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          project_id?: string | null
+          replicas_final?: number | null
+          replicas_planned?: number | null
+          role_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          project_id?: string | null
+          replicas_final?: number | null
+          replicas_planned?: number | null
+          role_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_castings_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "actors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_castings_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "casting_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_castings_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: true
+            referencedRelation: "project_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_conflicts: {
+        Row: {
+          created_at: string | null
+          evidence_json: Json | null
+          id: string
+          project_id: string | null
+          role_id_a: string | null
+          role_id_b: string | null
+          scene_reference: string | null
+          warning_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          evidence_json?: Json | null
+          id?: string
+          project_id?: string | null
+          role_id_a?: string | null
+          role_id_b?: string | null
+          scene_reference?: string | null
+          warning_type: string
+        }
+        Update: {
+          created_at?: string | null
+          evidence_json?: Json | null
+          id?: string
+          project_id?: string | null
+          role_id_a?: string | null
+          role_id_b?: string | null
+          scene_reference?: string | null
+          warning_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_conflicts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "casting_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_conflicts_role_id_a_fkey"
+            columns: ["role_id_a"]
+            isOneToOne: false
+            referencedRelation: "project_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_conflicts_role_id_b_fkey"
+            columns: ["role_id_b"]
+            isOneToOne: false
+            referencedRelation: "project_roles"
             referencedColumns: ["id"]
           },
         ]
