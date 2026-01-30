@@ -299,7 +299,7 @@ export function ActorIntakeForm() {
 
   const showLanguagesOther = languages.includes("אחר");
   const showSkillsOther = skills.includes("אחר");
-  const showSingingStyles = !!singingLevel;
+  const showSingingStyles = singingLevel && singingLevel !== "none";
 
   return (
     <div className="min-h-screen relative">
