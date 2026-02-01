@@ -20,6 +20,7 @@ import { Loader2, User, Briefcase, Languages, Sparkles, FileText, Image, Music, 
 import { FormSection } from "./FormSection";
 import { ChipSelect } from "./ChipSelect";
 import { FileUpload } from "./FileUpload";
+import { AudioInput } from "./AudioInput";
 import { SuccessScreen } from "./SuccessScreen";
 import scprodubLogo from "@/assets/scprodub-logo.png";
 import scWebsiteLogo from "@/assets/sc-website-logo.png";
@@ -803,8 +804,7 @@ export function ActorIntakeForm() {
 
             <div className="space-y-2">
               <Label>דוגמת קול</Label>
-              <FileUpload
-                type="audio"
+              <AudioInput
                 value={voiceSampleFile}
                 onChange={setVoiceSampleFile}
                 helper="מאוד מומלץ לצרף דוגמת קול"

@@ -414,6 +414,7 @@ export type Database = {
       }
       project_scripts: {
         Row: {
+          applied_at: string | null
           created_at: string | null
           file_name: string
           file_size_bytes: number | null
@@ -427,6 +428,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          applied_at?: string | null
           created_at?: string | null
           file_name: string
           file_size_bytes?: number | null
@@ -440,6 +442,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          applied_at?: string | null
           created_at?: string | null
           file_name?: string
           file_size_bytes?: number | null

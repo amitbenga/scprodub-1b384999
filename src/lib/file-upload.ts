@@ -20,6 +20,7 @@ const ALLOWED_AUDIO_TYPES = [
   "audio/m4a",
   "audio/ogg",
   "audio/aac",
+  "audio/webm",
 ];
 
 // Normalize MIME types for mobile compatibility
@@ -44,6 +45,7 @@ function getFileExtension(mimeType: string): string {
     "audio/mp4": "m4a",
     "audio/ogg": "ogg",
     "audio/aac": "aac",
+    "audio/webm": "webm",
   };
   return extMap[mimeType] || "bin";
 }
