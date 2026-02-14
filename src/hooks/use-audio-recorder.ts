@@ -4,6 +4,7 @@ interface AudioRecorderState {
   isRecording: boolean;
   isPaused: boolean;
   duration: number;
+  volume: number; // 0-1 normalized volume level
   audioBlob: Blob | null;
   audioUrl: string | null;
   error: string | null;
@@ -25,6 +26,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     isRecording: false,
     isPaused: false,
     duration: 0,
+    volume: 0,
     audioBlob: null,
     audioUrl: null,
     error: null,
@@ -35,8 +37,55 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const volumeRafRef = useRef<number | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
   const startTimeRef = useRef<number>(0);
   const pausedDurationRef = useRef<number>(0);
+
+  const stopVolumeMonitor = useCallback(() => {
+    if (volumeRafRef.current) {
+      cancelAnimationFrame(volumeRafRef.current);
+      volumeRafRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
+    }
+    analyserRef.current = null;
+    setState((prev) => ({ ...prev, volume: 0 }));
+  }, []);
+
+  const startVolumeMonitor = useCallback((stream: MediaStream) => {
+    try {
+      const audioContext = new AudioContext();
+      audioContextRef.current = audioContext;
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.5;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+      const updateVolume = () => {
+        if (!analyserRef.current) return;
+        analyserRef.current.getByteFrequencyData(dataArray);
+        // RMS-like average
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i];
+        }
+        const avg = sum / dataArray.length / 255; // normalize to 0-1
+        setState((prev) => ({ ...prev, volume: avg }));
+        volumeRafRef.current = requestAnimationFrame(updateVolume);
+      };
+      updateVolume();
+    } catch {
+      // Volume monitor is non-critical, fail silently
+    }
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -44,6 +93,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
+      stopVolumeMonitor();
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
@@ -94,6 +144,9 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
+      // Start volume monitoring
+      startVolumeMonitor(stream);
+
       // Determine best supported MIME type
       const mimeType = MediaRecorder.isTypeSupported("audio/webm")
         ? "audio/webm"
@@ -121,6 +174,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
           audioUrl: url,
         }));
         stopTimer();
+        stopVolumeMonitor();
 
         // Stop all tracks
         if (streamRef.current) {
@@ -136,6 +190,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
           error: "שגיאה בהקלטה",
         }));
         stopTimer();
+        stopVolumeMonitor();
       };
 
       mediaRecorder.start(100); // Collect data every 100ms
