@@ -16,8 +16,10 @@ export type Database = {
     Tables: {
       actor_submissions: {
         Row: {
+          accents: Json | null
           birth_year: number
           created_at: string
+          deleted_at: string | null
           email: string
           full_name: string
           gender: string
@@ -36,14 +38,17 @@ export type Database = {
           phone: string
           raw_payload: Json
           review_status: string
+          singing_sample_url: string | null
           skills: string[] | null
           skills_other: string | null
           vat_status: string
           voice_sample_url: string | null
         }
         Insert: {
+          accents?: Json | null
           birth_year: number
           created_at?: string
+          deleted_at?: string | null
           email: string
           full_name: string
           gender: string
@@ -62,14 +67,17 @@ export type Database = {
           phone: string
           raw_payload: Json
           review_status?: string
+          singing_sample_url?: string | null
           skills?: string[] | null
           skills_other?: string | null
           vat_status: string
           voice_sample_url?: string | null
         }
         Update: {
+          accents?: Json | null
           birth_year?: number
           created_at?: string
+          deleted_at?: string | null
           email?: string
           full_name?: string
           gender?: string
@@ -88,6 +96,7 @@ export type Database = {
           phone?: string
           raw_payload?: Json
           review_status?: string
+          singing_sample_url?: string | null
           skills?: string[] | null
           skills_other?: string | null
           vat_status?: string
@@ -105,6 +114,7 @@ export type Database = {
       }
       actors: {
         Row: {
+          accents: Json | null
           birth_year: number
           city: string | null
           created_at: string | null
@@ -115,11 +125,13 @@ export type Database = {
           id: string
           image_url: string | null
           is_course_grad: boolean | null
+          is_draft: boolean | null
           is_singer: boolean | null
           languages: Json | null
           notes: string | null
           other_lang_text: string | null
           phone: string
+          singing_sample_url: string | null
           singing_styles: Json | null
           singing_styles_other: Json | null
           skills: Json | null
@@ -128,6 +140,7 @@ export type Database = {
           voice_sample_url: string | null
         }
         Insert: {
+          accents?: Json | null
           birth_year: number
           city?: string | null
           created_at?: string | null
@@ -138,11 +151,13 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_course_grad?: boolean | null
+          is_draft?: boolean | null
           is_singer?: boolean | null
           languages?: Json | null
           notes?: string | null
           other_lang_text?: string | null
           phone: string
+          singing_sample_url?: string | null
           singing_styles?: Json | null
           singing_styles_other?: Json | null
           skills?: Json | null
@@ -151,6 +166,7 @@ export type Database = {
           voice_sample_url?: string | null
         }
         Update: {
+          accents?: Json | null
           birth_year?: number
           city?: string | null
           created_at?: string | null
@@ -161,11 +177,13 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_course_grad?: boolean | null
+          is_draft?: boolean | null
           is_singer?: boolean | null
           languages?: Json | null
           notes?: string | null
           other_lang_text?: string | null
           phone?: string
+          singing_sample_url?: string | null
           singing_styles?: Json | null
           singing_styles_other?: Json | null
           skills?: Json | null

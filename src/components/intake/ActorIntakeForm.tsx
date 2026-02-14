@@ -37,7 +37,11 @@ import {
 } from "@/lib/form-utils";
 
 const LANGUAGES = ["עברית", "אנגלית", "ערבית", "רוסית", "צרפתית", "אחר"];
-const SKILLS = ["קריינות", "מבטא רוסי", "כל מבטא אפשרי", "אחר"];
+const SKILLS = [
+  "קריינות", "מבטא רוסי", "מבטא צרפתי", "מבטא איטלקי",
+  "מבטא ספרדי", "מבטא גרמני", "מבטא אנגלי",
+  "כל מבטא אפשרי", "אחר",
+];
 const GENDERS = [
   { value: "male", label: "זכר" },
   { value: "female", label: "נקבה" },
@@ -55,26 +59,9 @@ const SINGING_LEVELS = [
   { value: "high", label: "שירה ברמה גבוהה" },
 ];
 
-const SINGING_STYLES = [
-  { value: "musical", label: "מוזיקל" },
-  { value: "classic", label: "קלאסי" },
-  { value: "pop", label: "פופ" },
-  { value: "opera", label: "אופרה" },
-  { value: "jazz", label: "ג׳אז" },
-  { value: "rock", label: "רוק" },
-];
+const SINGING_STYLES = ["מוזיקל", "קלאסי", "פופ", "אופרה", "ג׳אז", "רוק"];
 
 const BIRTH_YEARS = Array.from({ length: 71 }, (_, i) => 2010 - i);
-
-interface SingingStyleWithLevel {
-  style: string;
-  level: string;
-}
-
-interface OtherSingingStyle {
-  name: string;
-  level: string;
-}
 
 interface FormErrors {
   full_name?: string;
@@ -106,14 +93,10 @@ export function ActorIntakeForm() {
   
   // Singing
   const [singingLevel, setSingingLevel] = useState<string>("");
-  const [singingStyles, setSingingStyles] = useState<SingingStyleWithLevel[]>([]);
-  const [singingStylesOther, setSingingStylesOther] = useState<OtherSingingStyle[]>([]);
+  const [singingStyles, setSingingStyles] = useState<string[]>([]);
+  const [singingStylesOther, setSingingStylesOther] = useState<string[]>([]);
   const [newOtherStyleName, setNewOtherStyleName] = useState("");
-  const [newOtherStyleLevel, setNewOtherStyleLevel] = useState<"basic" | "good" | "high">("basic");
-  
-  // For adding new style with level
-  const [pendingStyle, setPendingStyle] = useState<string | null>(null);
-  const [pendingStyleLevel, setPendingStyleLevel] = useState<"basic" | "good" | "high">("basic");
+  const [singingSampleFile, setSingingSampleFile] = useState<File | null>(null);
   
   // Other fields
   const [vatStatus, setVatStatus] = useState("");
@@ -174,12 +157,8 @@ export function ActorIntakeForm() {
 
   const addOtherSingingStyle = () => {
     if (newOtherStyleName.trim()) {
-      setSingingStylesOther([
-        ...singingStylesOther,
-        { name: newOtherStyleName.trim(), level: newOtherStyleLevel }
-      ]);
+      setSingingStylesOther([...singingStylesOther, newOtherStyleName.trim()]);
       setNewOtherStyleName("");
-      setNewOtherStyleLevel("basic");
     }
   };
 
@@ -229,6 +208,19 @@ export function ActorIntakeForm() {
         logger.log("[ActorIntakeForm] Voice sample uploaded successfully");
       }
 
+      // Upload singing sample
+      let singingSampleUrl: string | null = null;
+      if (singingSampleFile) {
+        logger.log("[ActorIntakeForm] Uploading singing sample...");
+        const result = await uploadFile(singingSampleFile, "audio");
+        if (result.error) {
+          logger.error("[ActorIntakeForm] Singing sample upload failed");
+          throw new Error(`שגיאה בהעלאת דוגמת השירה: ${result.error}`);
+        }
+        singingSampleUrl = result.url;
+        logger.log("[ActorIntakeForm] Singing sample uploaded successfully");
+      }
+
       // Determine is_singer based on singing level
       const isSingerValue = singingLevel && singingLevel !== "none" ? true : false;
 
@@ -251,6 +243,7 @@ export function ActorIntakeForm() {
         notes: notes || null,
         image_url: imageUrl,
         voice_sample_url: voiceSampleUrl,
+        singing_sample_url: singingSampleUrl,
         match_status: "pending" as const,
         matched_actor_id: null,
         review_status: "pending" as const,
@@ -268,12 +261,13 @@ export function ActorIntakeForm() {
           skills_other: skillsOther || null,
           dubbing_experience_years: parseInt(dubbingExperienceYears) || 0,
           singing_level: singingLevel && singingLevel !== "none" ? singingLevel : null,
-          singing_styles: singingStyles.map(s => ({ style: s.style, level: s.level })),
-          singing_styles_other: singingStylesOther.map(s => ({ name: s.name, level: s.level })),
+          singing_styles: singingStyles,
+          singing_styles_other: singingStylesOther,
           studied_at: studiedAt.trim() || null,
           notes: notes || null,
           image_url: imageUrl,
           voice_sample_url: voiceSampleUrl,
+          singing_sample_url: singingSampleUrl,
           submitted_at: new Date().toISOString(),
         } as Json,
       };
@@ -541,102 +535,16 @@ export function ActorIntakeForm() {
               <>
                 <div className="space-y-3">
                   <Label>סגנונות שירה</Label>
-                  
-                  {/* Selected styles with levels */}
-                  {singingStyles.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {singingStyles.map((item, index) => {
-                        const styleLabel = SINGING_STYLES.find(s => s.value === item.style)?.label || item.style;
-                        const levelLabel = SINGING_LEVELS.find(l => l.value === item.level)?.label || item.level;
-                        return (
-                          <div
-                            key={index}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm"
-                          >
-                            <span>{styleLabel}</span>
-                            <span className="text-xs opacity-70">({levelLabel})</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSingingStyles(prev => prev.filter((_, i) => i !== index));
-                              }}
-                              className="mr-1 hover:text-destructive"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Style selection chips */}
-                  <div className="flex flex-wrap gap-2">
-                    {SINGING_STYLES
-                      .filter(style => !singingStyles.some(s => s.style === style.value))
-                      .map(style => (
-                        <button
-                          key={style.value}
-                          type="button"
-                          onClick={() => setPendingStyle(style.value)}
-                          className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                            pendingStyle === style.value 
-                              ? "bg-primary text-primary-foreground border-primary" 
-                              : "bg-background hover:bg-muted border-input"
-                          }`}
-                        >
-                          {style.label}
-                        </button>
-                      ))}
-                  </div>
-
-                  {/* Level selection for pending style */}
-                  {pendingStyle && (
-                    <div className="flex flex-wrap gap-2 items-center p-3 bg-muted rounded-lg">
-                      <span className="text-sm font-medium">
-                        {SINGING_STYLES.find(s => s.value === pendingStyle)?.label}:
-                      </span>
-                      <Select value={pendingStyleLevel} onValueChange={(v) => setPendingStyleLevel(v as "basic" | "good" | "high")}>
-                        <SelectTrigger className="w-36">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="basic">רמה בסיסית</SelectItem>
-                          <SelectItem value="good">רמה טובה</SelectItem>
-                          <SelectItem value="high">רמה גבוהה</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => {
-                          setSingingStyles(prev => [...prev, { style: pendingStyle, level: pendingStyleLevel }]);
-                          setPendingStyle(null);
-                          setPendingStyleLevel("basic");
-                        }}
-                      >
-                        <Plus className="h-4 w-4 ml-1" />
-                        הוסף
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setPendingStyle(null);
-                          setPendingStyleLevel("basic");
-                        }}
-                      >
-                        ביטול
-                      </Button>
-                    </div>
-                  )}
+                  <ChipSelect
+                    options={SINGING_STYLES}
+                    selected={singingStyles}
+                    onChange={setSingingStyles}
+                  />
                 </div>
 
                 <div className="space-y-3">
                   <Label>סגנונות שירה נוספים</Label>
                   
-                  {/* List of added other styles */}
                   {singingStylesOther.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {singingStylesOther.map((style, index) => (
@@ -644,10 +552,7 @@ export function ActorIntakeForm() {
                           key={index}
                           className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm"
                         >
-                          <span>{style.name}</span>
-                          <span className="text-xs opacity-70">
-                            ({SINGING_LEVELS.find(l => l.value === style.level)?.label || style.level})
-                          </span>
+                          <span>{style}</span>
                           <button
                             type="button"
                             onClick={() => removeOtherSingingStyle(index)}
@@ -660,26 +565,19 @@ export function ActorIntakeForm() {
                     </div>
                   )}
 
-                  {/* Add new other style */}
-                  <div className="flex flex-wrap gap-2 items-end">
+                  <div className="flex gap-2 items-end">
                     <div className="flex-1 min-w-[150px]">
                       <Input
                         value={newOtherStyleName}
                         onChange={(e) => setNewOtherStyleName(e.target.value)}
                         placeholder="שם הסגנון"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addOtherSingingStyle();
+                          }
+                        }}
                       />
-                    </div>
-                    <div className="w-40">
-                      <Select value={newOtherStyleLevel} onValueChange={(v) => setNewOtherStyleLevel(v as "basic" | "good" | "high")}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="basic">רמה בסיסית</SelectItem>
-                          <SelectItem value="good">רמה טובה</SelectItem>
-                          <SelectItem value="high">רמה גבוהה</SelectItem>
-                        </SelectContent>
-                      </Select>
                     </div>
                     <Button
                       type="button"
@@ -809,6 +707,15 @@ export function ActorIntakeForm() {
                 onChange={setVoiceSampleFile}
                 helper="מאוד מומלץ לצרף דוגמת קול"
                 error={errors.voice_sample}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>דוגמת שירה</Label>
+              <AudioInput
+                value={singingSampleFile}
+                onChange={setSingingSampleFile}
+                helper="צרפו דוגמת שירה אם רלוונטי"
               />
             </div>
           </FormSection>
