@@ -23,6 +23,7 @@ export function AudioInput({ value, onChange, helper, error }: AudioInputProps) 
     isRecording,
     isPaused,
     duration,
+    volume,
     audioBlob,
     audioUrl,
     error: recorderError,
@@ -156,11 +157,36 @@ export function AudioInput({ value, onChange, helper, error }: AudioInputProps) 
           <div className="recording-indicator">
             <span className="recording-dot" />
           </div>
-          <div className="flex-1">
+          <div className="flex-1 space-y-2">
             <p className="text-sm font-medium">מקליט...</p>
             <p className="text-2xl font-mono font-bold text-primary">
               {formatDuration(duration)}
             </p>
+            {/* Volume meter */}
+            <div className="flex items-center gap-2">
+              <div className="flex gap-[2px] items-end h-4 flex-1">
+                {Array.from({ length: 20 }).map((_, i) => {
+                  const threshold = (i + 1) / 20;
+                  const active = !isPaused && volume >= threshold;
+                  return (
+                    <div
+                      key={i}
+                      className={cn(
+                        "flex-1 rounded-sm transition-all duration-75",
+                        active
+                          ? threshold > 0.85
+                            ? "bg-destructive"
+                            : threshold > 0.6
+                            ? "bg-amber-500"
+                            : "bg-emerald-500"
+                          : "bg-muted"
+                      )}
+                      style={{ height: `${40 + (i / 20) * 60}%` }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
             <p className="text-xs text-muted-foreground">מקסימום 2 דקות</p>
           </div>
           <div className="flex gap-2">
