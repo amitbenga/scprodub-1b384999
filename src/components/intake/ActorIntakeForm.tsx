@@ -109,6 +109,7 @@ export function ActorIntakeForm() {
   const [notes, setNotes] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [voiceSampleFile, setVoiceSampleFile] = useState<File | null>(null);
+  const [youtubeLink, setYoutubeLink] = useState("");
 
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -268,6 +269,7 @@ export function ActorIntakeForm() {
           image_url: imageUrl,
           voice_sample_url: voiceSampleUrl,
           singing_sample_url: singingSampleUrl,
+          youtube_link: youtubeLink.trim() || null,
           submitted_at: new Date().toISOString(),
         } as Json,
       };
@@ -622,7 +624,7 @@ export function ActorIntakeForm() {
           </FormSection>
 
           {/* Section 5: Languages */}
-          <FormSection title="שפות" icon={Languages}>
+          <FormSection title="שפות בשליטה מלאה" icon={Languages}>
             <div className="space-y-2">
               <Label>שפות *</Label>
               <ChipSelect
@@ -717,6 +719,19 @@ export function ActorIntakeForm() {
                 onChange={setSingingSampleFile}
                 helper="צרפו דוגמת שירה אם רלוונטי"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="youtubeLink">לינק ליוטיוב</Label>
+              <Input
+                id="youtubeLink"
+                type="url"
+                value={youtubeLink}
+                onChange={(e) => setYoutubeLink(e.target.value)}
+                placeholder="https://www.youtube.com/watch?v=..."
+                dir="ltr"
+              />
+              <p className="form-helper">אם יש לכם תוכן שפורסם ביוטיוב — הדביקו את הלינק כאן</p>
             </div>
           </FormSection>
 
