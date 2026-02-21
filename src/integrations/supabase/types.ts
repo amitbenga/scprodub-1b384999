@@ -38,11 +38,14 @@ export type Database = {
           phone: string
           raw_payload: Json
           review_status: string
+          singing_level: string | null
           singing_sample_url: string | null
+          singing_styles: Json | null
           skills: string[] | null
           skills_other: string | null
           vat_status: string
           voice_sample_url: string | null
+          youtube_link: string | null
         }
         Insert: {
           accents?: Json | null
@@ -67,11 +70,14 @@ export type Database = {
           phone: string
           raw_payload: Json
           review_status?: string
+          singing_level?: string | null
           singing_sample_url?: string | null
+          singing_styles?: Json | null
           skills?: string[] | null
           skills_other?: string | null
           vat_status: string
           voice_sample_url?: string | null
+          youtube_link?: string | null
         }
         Update: {
           accents?: Json | null
@@ -96,11 +102,14 @@ export type Database = {
           phone?: string
           raw_payload?: Json
           review_status?: string
+          singing_level?: string | null
           singing_sample_url?: string | null
+          singing_styles?: Json | null
           skills?: string[] | null
           skills_other?: string | null
           vat_status?: string
           voice_sample_url?: string | null
+          youtube_link?: string | null
         }
         Relationships: [
           {
@@ -131,6 +140,7 @@ export type Database = {
           notes: string | null
           other_lang_text: string | null
           phone: string
+          singing_level: string | null
           singing_sample_url: string | null
           singing_styles: Json | null
           singing_styles_other: Json | null
@@ -138,6 +148,7 @@ export type Database = {
           updated_at: string | null
           vat_status: string
           voice_sample_url: string | null
+          youtube_link: string | null
         }
         Insert: {
           accents?: Json | null
@@ -157,6 +168,7 @@ export type Database = {
           notes?: string | null
           other_lang_text?: string | null
           phone: string
+          singing_level?: string | null
           singing_sample_url?: string | null
           singing_styles?: Json | null
           singing_styles_other?: Json | null
@@ -164,6 +176,7 @@ export type Database = {
           updated_at?: string | null
           vat_status: string
           voice_sample_url?: string | null
+          youtube_link?: string | null
         }
         Update: {
           accents?: Json | null
@@ -183,6 +196,7 @@ export type Database = {
           notes?: string | null
           other_lang_text?: string | null
           phone?: string
+          singing_level?: string | null
           singing_sample_url?: string | null
           singing_styles?: Json | null
           singing_styles_other?: Json | null
@@ -190,6 +204,7 @@ export type Database = {
           updated_at?: string | null
           vat_status?: string
           voice_sample_url?: string | null
+          youtube_link?: string | null
         }
         Relationships: []
       }
@@ -538,7 +553,7 @@ export type Database = {
           {
             foreignKeyName: "role_castings_role_id_fkey"
             columns: ["role_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "project_roles"
             referencedColumns: ["id"]
           },
