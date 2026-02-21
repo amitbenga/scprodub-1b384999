@@ -706,6 +706,66 @@ export type Database = {
           },
         ]
       }
+      script_lines: {
+        Row: {
+          actor_id: string | null
+          created_at: string | null
+          id: string
+          line_number: number | null
+          notes: string | null
+          project_id: string
+          rec_status: string | null
+          role_name: string
+          script_id: string | null
+          source_text: string | null
+          timecode: string | null
+          translation: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string | null
+          id?: string
+          line_number?: number | null
+          notes?: string | null
+          project_id: string
+          rec_status?: string | null
+          role_name: string
+          script_id?: string | null
+          source_text?: string | null
+          timecode?: string | null
+          translation?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string | null
+          id?: string
+          line_number?: number | null
+          notes?: string | null
+          project_id?: string
+          rec_status?: string | null
+          role_name?: string
+          script_id?: string | null
+          source_text?: string | null
+          timecode?: string | null
+          translation?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "script_lines_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "actors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "script_lines_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "casting_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           created_at: string | null
