@@ -1,56 +1,63 @@
 /**
- * R2 URL resolution for the client — PUBLIC URL model.
+ * R2 URL resolution for the client — PRIVATE BUCKET model.
  *
- * This module resolves R2 object keys to publicly accessible URLs.
- * It does NOT use signed URLs or a server-side proxy.
+ * The R2 bucket is private. Objects are never publicly accessible.
+ * All file reads go through the server-side /api/signed-url endpoint,
+ * which generates a time-limited pre-signed URL (default: 15 minutes).
  *
- * Requirement: The R2 bucket MUST have public access enabled via one of:
- *   - A custom domain (e.g. media.sc-produb.com) attached to the R2 bucket
- *   - The R2.dev subdomain (e.g. pub-xxx.r2.dev) enabled in Cloudflare dashboard
+ * This module:
+ * - Does NOT use VITE_R2_PUBLIC_URL or any public bucket URL
+ * - Does NOT construct direct R2 object URLs client-side
+ * - Does NOT expose R2 credentials to the browser
  *
- * Env var: VITE_R2_PUBLIC_URL — the base URL for the R2 bucket's public access.
- * Example: https://media.sc-produb.com  or  https://pub-xxx.r2.dev
- *
- * Actor submission media (headshots, voice samples) is not sensitive,
- * so public access is the appropriate model for this use case.
+ * Usage:
+ *   const url = await resolveMediaUrl(objectKey);
+ *   // url is a signed R2 URL valid for 15 minutes, or null if key is empty
  */
 
 import { isR2ObjectKey } from "./r2-keys";
 
+export type SignedUrlResult = {
+  signedUrl: string;
+  expiresAt: string; // ISO timestamp
+};
+
 /**
- * Resolve an R2 object key to a publicly accessible URL.
- *
- * - If the value is already a full URL (legacy Supabase or other), returns it as-is.
- * - If the value is a data: URL (legacy base64), returns it as-is.
- * - If the value is an R2 object key, prepends the R2 public base URL.
- * - Returns null for null/undefined/empty input.
+ * Fetch a signed URL for an R2 object key from the server-side endpoint.
+ * Returns null if the key is empty/null.
+ * Throws if the server returns an error.
  */
-export function resolveMediaUrl(value: string | null | undefined): string | null {
+export async function resolveMediaUrl(
+  value: string | null | undefined
+): Promise<string | null> {
   if (!value) return null;
 
-  // Already a full URL (legacy Supabase storage or other) — pass through
+  // Legacy full URL (e.g. old Supabase Storage URLs) — pass through as-is.
+  // These will stop appearing once all rows are migrated.
   if (value.startsWith("http://") || value.startsWith("https://")) {
     return value;
   }
 
-  // Legacy base64 data URL — pass through
+  // Legacy base64 data URL — pass through as-is.
   if (value.startsWith("data:")) {
     return value;
   }
 
-  // R2 object key — resolve to public URL
+  // R2 object key — fetch a signed URL from the server
   if (isR2ObjectKey(value)) {
-    const baseUrl = import.meta.env.VITE_R2_PUBLIC_URL;
-    if (!baseUrl) {
-      console.warn(
-        "[R2 URL] VITE_R2_PUBLIC_URL is not set. Cannot resolve R2 object key:",
-        value
-      );
-      return null;
+    const response = await fetch("/api/signed-url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ objectKey: value }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ error: "Unknown error" }));
+      throw new Error(`[R2 URL] Failed to get signed URL for ${value}: ${err.error}`);
     }
-    // Ensure no double slash between base and key
-    const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-    return `${cleanBase}/${value}`;
+
+    const data: SignedUrlResult = await response.json();
+    return data.signedUrl;
   }
 
   // Unknown format — return as-is
