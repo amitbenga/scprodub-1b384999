@@ -1,6 +1,4 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { getR2Client, getR2BucketName } from "./_r2";
 
 /**
  * Vercel serverless function to delete an R2 object.
@@ -39,6 +37,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!/^actor-submissions\/[a-zA-Z0-9-]+\/(images|audio|documents)\/[a-zA-Z0-9._-]+$/.test(objectKey)) {
       return res.status(400).json({ error: "Invalid object key format" });
     }
+
+    const { getR2Client, getR2BucketName } = await import("./_r2");
+    const { DeleteObjectCommand } = await import("@aws-sdk/client-s3");
 
     const bucketName = getR2BucketName();
     const r2 = getR2Client();
