@@ -26,7 +26,7 @@ import scprodubLogo from "@/assets/scprodub-logo.png";
 import scWebsiteLogo from "@/assets/sc-website-logo.png";
 import microphoneBg from "@/assets/microphone-bg.jpg";
 
-import { uploadFile, validateImageFile, validateAudioFile } from "@/lib/file-upload";
+import { uploadFileToR2, validateImageFile, validateAudioFile } from "@/lib/file-upload";
 import { logger } from "@/lib/logger";
 import {
   normalizeEmail,
@@ -183,49 +183,58 @@ export function ActorIntakeForm() {
     logger.log("[ActorIntakeForm] Starting submission...");
 
     try {
-      // Upload files
-      let imageUrl: string | null = null;
-      let voiceSampleUrl: string | null = null;
+      // Generate a stable submission ID for R2 key construction.
+      // This ID is used as the R2 path prefix so all media for this
+      // submission is grouped under one deterministic key.
+      const submissionId = crypto.randomUUID();
+      logger.log(`[ActorIntakeForm] Submission ID: ${submissionId}`);
+
+      // Upload files to R2 — stores return R2 object keys (NOT URLs)
+      let imageKey: string | null = null;
+      let voiceSampleKey: string | null = null;
 
       if (imageFile) {
-        logger.log("[ActorIntakeForm] Uploading image...");
-        const result = await uploadFile(imageFile, "images");
+        logger.log("[ActorIntakeForm] Uploading image to R2...");
+        const result = await uploadFileToR2(imageFile, "images", submissionId);
         if (result.error) {
           logger.error("[ActorIntakeForm] Image upload failed");
           throw new Error(`שגיאה בהעלאת התמונה: ${result.error}`);
         }
-        imageUrl = result.url;
-        logger.log("[ActorIntakeForm] Image uploaded successfully");
+        imageKey = result.objectKey;
+        logger.log(`[ActorIntakeForm] Image uploaded. Key: ${imageKey}`);
       }
 
       if (voiceSampleFile) {
-        logger.log("[ActorIntakeForm] Uploading voice sample...");
-        const result = await uploadFile(voiceSampleFile, "audio");
+        logger.log("[ActorIntakeForm] Uploading voice sample to R2...");
+        const result = await uploadFileToR2(voiceSampleFile, "audio", submissionId);
         if (result.error) {
           logger.error("[ActorIntakeForm] Voice sample upload failed");
           throw new Error(`שגיאה בהעלאת קובץ הקול: ${result.error}`);
         }
-        voiceSampleUrl = result.url;
-        logger.log("[ActorIntakeForm] Voice sample uploaded successfully");
+        voiceSampleKey = result.objectKey;
+        logger.log(`[ActorIntakeForm] Voice sample uploaded. Key: ${voiceSampleKey}`);
       }
 
-      // Upload singing sample
-      let singingSampleUrl: string | null = null;
+      // Upload singing sample to R2
+      let singingSampleKey: string | null = null;
       if (singingSampleFile) {
-        logger.log("[ActorIntakeForm] Uploading singing sample...");
-        const result = await uploadFile(singingSampleFile, "audio");
+        logger.log("[ActorIntakeForm] Uploading singing sample to R2...");
+        const result = await uploadFileToR2(singingSampleFile, "audio", submissionId);
         if (result.error) {
           logger.error("[ActorIntakeForm] Singing sample upload failed");
           throw new Error(`שגיאה בהעלאת דוגמת השירה: ${result.error}`);
         }
-        singingSampleUrl = result.url;
-        logger.log("[ActorIntakeForm] Singing sample uploaded successfully");
+        singingSampleKey = result.objectKey;
+        logger.log(`[ActorIntakeForm] Singing sample uploaded. Key: ${singingSampleKey}`);
       }
 
       // Determine is_singer based on singing level
       const isSingerValue = singingLevel && singingLevel !== "none" ? true : false;
 
-      // Prepare data for actor_submissions table
+      // Prepare data for actor_submissions table.
+      // Media fields (image_url, voice_sample_url, singing_sample_url) now store
+      // R2 object keys — NOT full URLs or base64 data.
+      // Example key: actor-submissions/{submissionId}/images/{uuid}-{ts}.jpg
       const insertData = {
         full_name: fullName.trim(),
         email: email.trim(),
@@ -242,9 +251,9 @@ export function ActorIntakeForm() {
         is_singer: isSingerValue,
         is_course_graduate: isCourseGraduate,
         notes: notes || null,
-        image_url: imageUrl,
-        voice_sample_url: voiceSampleUrl,
-        singing_sample_url: singingSampleUrl,
+        image_url: imageKey,
+        voice_sample_url: voiceSampleKey,
+        singing_sample_url: singingSampleKey,
         match_status: "pending" as const,
         matched_actor_id: null,
         review_status: "pending" as const,
@@ -266,9 +275,9 @@ export function ActorIntakeForm() {
           singing_styles_other: singingStylesOther,
           studied_at: studiedAt.trim() || null,
           notes: notes || null,
-          image_url: imageUrl,
-          voice_sample_url: voiceSampleUrl,
-          singing_sample_url: singingSampleUrl,
+          image_url: imageKey,
+          voice_sample_url: voiceSampleKey,
+          singing_sample_url: singingSampleKey,
           youtube_link: youtubeLink.trim() || null,
           submitted_at: new Date().toISOString(),
         } as Json,
@@ -276,7 +285,11 @@ export function ActorIntakeForm() {
 
       // NOTE: Do not call .select() here.
       // RLS allows public INSERTs but SELECT is restricted to admins.
-      logger.log("[ActorIntakeForm] Inserting data");
+      logger.log("[ActorIntakeForm] Inserting data with R2 keys:", {
+        image_url: insertData.image_url,
+        voice_sample_url: insertData.voice_sample_url,
+        singing_sample_url: insertData.singing_sample_url,
+      });
 
       const { error } = await supabase.from("actor_submissions").insert([insertData]);
 
@@ -285,7 +298,7 @@ export function ActorIntakeForm() {
         throw new Error(error.message);
       }
 
-      logger.log("[ActorIntakeForm] Insert successful");
+      logger.log("[ActorIntakeForm] Insert successful — all media stored as R2 object keys");
       setIsSuccess(true);
     } catch (err) {
       logger.error("[ActorIntakeForm] Submit error");
