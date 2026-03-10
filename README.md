@@ -59,10 +59,50 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase (auth & database)
+- Cloudflare R2 (media storage via S3-compatible API)
+- Vercel serverless functions (R2 proxy layer)
+
+## Media upload architecture
+
+File uploads (headshots, audio reels, documents) flow through Vercel serverless functions that proxy requests to a **private** Cloudflare R2 bucket. The client never has direct access to R2 credentials.
+
+```
+Browser  ──POST /api/upload──▶  Vercel function  ──PutObject──▶  R2 bucket
+Browser  ──POST /api/signed-url──▶  Vercel function  ──getSignedUrl──▶  pre-signed URL
+Browser  ──POST /api/delete──▶  Vercel function  ──DeleteObject──▶  R2 bucket
+```
+
+All three serverless functions share a single R2 client factory in `api/_r2.ts`.
+
+Object keys follow the pattern: `actor-submissions/{submissionId}/{folder}/{filename}`
+
+## Environment variables
+
+Copy `.env.example` to `.env` for local development.
+
+### Client-side (build-time, set in Vercel **and** locally)
+
+| Variable | Description |
+|---|---|
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase anon/public key |
+
+### Server-side (Vercel project settings only — never commit)
+
+| Variable | Required | Description |
+|---|---|---|
+| `R2_ACCOUNT_ID` | Yes* | Cloudflare account ID |
+| `R2_ACCESS_KEY_ID` | Yes | R2 API token access key |
+| `R2_SECRET_ACCESS_KEY` | Yes | R2 API token secret |
+| `R2_BUCKET_NAME` | Yes | R2 bucket name |
+| `R2_ENDPOINT` | No | Optional endpoint override (defaults to `https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com`) |
+
+\* Required unless `R2_ENDPOINT` is provided.
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Deploy to Vercel and configure the environment variables listed above in your Vercel project settings. The `api/` directory is automatically deployed as serverless functions.
 
 ## Can I connect a custom domain to my Lovable project?
 
