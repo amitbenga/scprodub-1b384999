@@ -1,5 +1,5 @@
-import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
+import type { R2MediaFolder } from "@/lib/r2-keys";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -76,39 +76,79 @@ export function validateAudioFile(file: File): FileValidationResult {
   return { valid: true };
 }
 
-export async function uploadFile(
+/**
+ * Upload a file to R2 via the server-side API route.
+ *
+ * Returns the R2 object key on success (NOT a full URL).
+ * The key follows the convention: actor-submissions/{submissionId}/{folder}/{filename}
+ */
+export async function uploadFileToR2(
   file: File,
-  folder: "images" | "audio"
-): Promise<{ url: string | null; error: string | null }> {
+  folder: R2MediaFolder,
+  submissionId: string
+): Promise<{ objectKey: string | null; error: string | null }> {
   try {
     const normalizedMime = normalizeMimeType(file.type);
     const ext = getFileExtension(normalizedMime);
     const timestamp = Date.now();
     const uuid = crypto.randomUUID();
-    const fileName = `${folder}/${uuid}-${timestamp}.${ext}`;
+    const uploadFilename = `${uuid}-${timestamp}.${ext}`;
 
-    // Create a new blob with normalized MIME type for mobile compatibility
+    // Create a blob with normalized MIME type for mobile compatibility
     const normalizedBlob = new Blob([file], { type: normalizedMime });
 
-    const { error: uploadError } = await supabase.storage
-      .from("actor-submissions")
-      .upload(fileName, normalizedBlob, {
-        cacheControl: "3600",
-        upsert: false,
-      });
+    const params = new URLSearchParams({
+      folder,
+      submissionId,
+      filename: uploadFilename,
+    });
 
-    if (uploadError) {
-      logger.error("Upload error:", uploadError);
-      return { url: null, error: "שגיאה בהעלאת הקובץ" };
+    logger.log(`[R2 Upload] Uploading to /api/upload?${params.toString()}`);
+
+    const response = await fetch(`/api/upload?${params.toString()}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": normalizedMime,
+      },
+      body: normalizedBlob,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Upload failed" }));
+      logger.error("[R2 Upload] Server error:", errorData);
+      return { objectKey: null, error: errorData.error || "שגיאה בהעלאת הקובץ" };
     }
 
-    const { data: urlData } = supabase.storage
-      .from("actor-submissions")
-      .getPublicUrl(fileName);
-
-    return { url: urlData.publicUrl, error: null };
+    const data = await response.json();
+    logger.log(`[R2 Upload] Success. Object key: ${data.objectKey}`);
+    return { objectKey: data.objectKey, error: null };
   } catch (err) {
-    logger.error("Upload exception:", err);
-    return { url: null, error: "שגיאה בהעלאת הקובץ" };
+    logger.error("[R2 Upload] Exception:", err);
+    return { objectKey: null, error: "שגיאה בהעלאת הקובץ" };
+  }
+}
+
+/**
+ * Delete an R2 object by key. Used for cleanup when DB insert fails
+ * after files were already uploaded (prevents orphaned objects).
+ *
+ * Best-effort: errors are logged but not thrown.
+ */
+export async function deleteR2Object(objectKey: string): Promise<void> {
+  try {
+    logger.log(`[R2 Cleanup] Deleting orphaned object: ${objectKey}`);
+    const response = await fetch("/api/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ objectKey }),
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      logger.error("[R2 Cleanup] Delete failed:", data);
+    } else {
+      logger.log(`[R2 Cleanup] Deleted: ${objectKey}`);
+    }
+  } catch (err) {
+    logger.error("[R2 Cleanup] Exception during delete:", err);
   }
 }
