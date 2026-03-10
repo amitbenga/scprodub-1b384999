@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { getR2Client, getR2BucketName } from "./_r2";
 
 /**
  * Vercel serverless function to delete an R2 object.
@@ -8,22 +9,6 @@ import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
  * Expects: POST with JSON body { objectKey: string }
  * Returns: { deleted: true }
  */
-
-function getR2Client(): S3Client {
-  const accountId = process.env.R2_ACCOUNT_ID;
-  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
-
-  if (!accountId || !accessKeyId || !secretAccessKey) {
-    throw new Error("R2 environment variables are not configured");
-  }
-
-  return new S3Client({
-    region: "auto",
-    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-    credentials: { accessKeyId, secretAccessKey },
-  });
-}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -55,11 +40,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: "Invalid object key format" });
     }
 
-    const bucketName = process.env.R2_BUCKET_NAME;
-    if (!bucketName) {
-      return res.status(500).json({ error: "R2_BUCKET_NAME not configured" });
-    }
-
+    const bucketName = getR2BucketName();
     const r2 = getR2Client();
 
     await r2.send(

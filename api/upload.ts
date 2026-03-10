@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getR2Client, getR2BucketName } from "./_r2";
 
 const ALLOWED_FOLDERS = ["images", "audio", "documents"] as const;
 type AllowedFolder = (typeof ALLOWED_FOLDERS)[number];
@@ -22,22 +23,6 @@ const ALLOWED_MIME_TYPES: Record<AllowedFolder, string[]> = {
   ],
   documents: ["application/pdf"],
 };
-
-function getR2Client(): S3Client {
-  const accountId = process.env.R2_ACCOUNT_ID;
-  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
-
-  if (!accountId || !accessKeyId || !secretAccessKey) {
-    throw new Error("R2 environment variables are not configured");
-  }
-
-  return new S3Client({
-    region: "auto",
-    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-    credentials: { accessKeyId, secretAccessKey },
-  });
-}
 
 function isAllowedFolder(folder: string): folder is AllowedFolder {
   return ALLOWED_FOLDERS.includes(folder as AllowedFolder);
@@ -117,11 +102,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // actor-submissions/{submissionId}/{folder}/{filename}
     const objectKey = `actor-submissions/${submissionId}/${folder}/${sanitizedFilename}`;
 
-    const bucketName = process.env.R2_BUCKET_NAME;
-    if (!bucketName) {
-      return res.status(500).json({ error: "R2_BUCKET_NAME not configured" });
-    }
-
+    const bucketName = getR2BucketName();
     const r2 = getR2Client();
 
     await r2.send(
