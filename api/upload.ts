@@ -1,6 +1,4 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { getR2Client, getR2BucketName } from "./_r2";
 
 const ALLOWED_FOLDERS = ["images", "audio", "documents"] as const;
 type AllowedFolder = (typeof ALLOWED_FOLDERS)[number];
@@ -102,8 +100,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // actor-submissions/{submissionId}/{folder}/{filename}
     const objectKey = `actor-submissions/${submissionId}/${folder}/${sanitizedFilename}`;
 
+    // Lazy-import R2 helpers so that module-level import errors
+    // (e.g. AWS SDK bundling failures) are caught inside the try/catch
+    // and always produce a JSON response instead of a Vercel crash page.
+    const { getR2Client, getR2BucketName } = await import("./_r2");
+
     const bucketName = getR2BucketName();
     const r2 = getR2Client();
+
+    const { PutObjectCommand } = await import("@aws-sdk/client-s3");
 
     await r2.send(
       new PutObjectCommand({

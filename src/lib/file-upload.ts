@@ -114,9 +114,19 @@ export async function uploadFileToR2(
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: "Upload failed" }));
-      logger.error("[R2 Upload] Server error:", errorData);
-      return { objectKey: null, error: errorData.error || "שגיאה בהעלאת הקובץ" };
+      let serverError: string;
+      try {
+        const errorData = await response.json();
+        serverError = errorData.error || `Server responded with ${response.status}`;
+      } catch {
+        // Response was not JSON — likely an HTML error page from Vercel,
+        // meaning the serverless function crashed before it could respond.
+        const bodySnippet = await response.text().catch(() => "");
+        logger.error("[R2 Upload] Non-JSON response body:", bodySnippet.slice(0, 200));
+        serverError = `Upload API returned ${response.status} (non-JSON response — check Vercel function logs)`;
+      }
+      logger.error("[R2 Upload] Server error:", serverError);
+      return { objectKey: null, error: serverError };
     }
 
     const data = await response.json();
