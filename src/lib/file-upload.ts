@@ -127,3 +127,28 @@ export async function uploadFileToR2(
     return { objectKey: null, error: "שגיאה בהעלאת הקובץ" };
   }
 }
+
+/**
+ * Delete an R2 object by key. Used for cleanup when DB insert fails
+ * after files were already uploaded (prevents orphaned objects).
+ *
+ * Best-effort: errors are logged but not thrown.
+ */
+export async function deleteR2Object(objectKey: string): Promise<void> {
+  try {
+    logger.log(`[R2 Cleanup] Deleting orphaned object: ${objectKey}`);
+    const response = await fetch("/api/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ objectKey }),
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      logger.error("[R2 Cleanup] Delete failed:", data);
+    } else {
+      logger.log(`[R2 Cleanup] Deleted: ${objectKey}`);
+    }
+  } catch (err) {
+    logger.error("[R2 Cleanup] Exception during delete:", err);
+  }
+}

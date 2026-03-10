@@ -26,7 +26,7 @@ import scprodubLogo from "@/assets/scprodub-logo.png";
 import scWebsiteLogo from "@/assets/sc-website-logo.png";
 import microphoneBg from "@/assets/microphone-bg.jpg";
 
-import { uploadFileToR2, validateImageFile, validateAudioFile } from "@/lib/file-upload";
+import { uploadFileToR2, deleteR2Object, validateImageFile, validateAudioFile } from "@/lib/file-upload";
 import { logger } from "@/lib/logger";
 import {
   normalizeEmail,
@@ -294,7 +294,10 @@ export function ActorIntakeForm() {
       const { error } = await supabase.from("actor_submissions").insert([insertData]);
 
       if (error) {
-        logger.error("[ActorIntakeForm] Supabase insert error");
+        logger.error("[ActorIntakeForm] Supabase insert error — cleaning up R2 objects");
+        // Clean up uploaded R2 objects to prevent orphans
+        const keysToClean = [imageKey, voiceSampleKey, singingSampleKey].filter(Boolean) as string[];
+        await Promise.allSettled(keysToClean.map((key) => deleteR2Object(key)));
         throw new Error(error.message);
       }
 

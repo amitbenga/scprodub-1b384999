@@ -1,11 +1,18 @@
 /**
- * R2 URL resolution for the client.
+ * R2 URL resolution for the client — PUBLIC URL model.
  *
- * Resolves R2 object keys to public URLs using the configured R2 public domain.
- * The R2 bucket should have a public custom domain (or R2.dev subdomain) configured.
+ * This module resolves R2 object keys to publicly accessible URLs.
+ * It does NOT use signed URLs or a server-side proxy.
+ *
+ * Requirement: The R2 bucket MUST have public access enabled via one of:
+ *   - A custom domain (e.g. media.sc-produb.com) attached to the R2 bucket
+ *   - The R2.dev subdomain (e.g. pub-xxx.r2.dev) enabled in Cloudflare dashboard
  *
  * Env var: VITE_R2_PUBLIC_URL — the base URL for the R2 bucket's public access.
  * Example: https://media.sc-produb.com  or  https://pub-xxx.r2.dev
+ *
+ * Actor submission media (headshots, voice samples) is not sensitive,
+ * so public access is the appropriate model for this use case.
  */
 
 import { isR2ObjectKey } from "./r2-keys";
