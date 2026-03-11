@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 const ALLOWED_FOLDERS = ["images", "audio", "documents"] as const;
 type AllowedFolder = (typeof ALLOWED_FOLDERS)[number];
@@ -24,6 +25,34 @@ const ALLOWED_MIME_TYPES: Record<AllowedFolder, string[]> = {
 
 function isAllowedFolder(folder: string): folder is AllowedFolder {
   return ALLOWED_FOLDERS.includes(folder as AllowedFolder);
+}
+
+function getR2Client(): S3Client {
+  const accountId = process.env.R2_ACCOUNT_ID;
+  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+  const endpoint =
+    process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+
+  if (!endpoint || !accessKeyId || !secretAccessKey) {
+    throw new Error(
+      "R2 environment variables are not configured. Required: R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and either R2_ENDPOINT or R2_ACCOUNT_ID"
+    );
+  }
+
+  return new S3Client({
+    region: "auto",
+    endpoint,
+    credentials: { accessKeyId, secretAccessKey },
+  });
+}
+
+function getR2BucketName(): string {
+  const bucketName = process.env.R2_BUCKET_NAME;
+  if (!bucketName) {
+    throw new Error("R2_BUCKET_NAME is not configured");
+  }
+  return bucketName;
 }
 
 /**
@@ -100,15 +129,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // actor-submissions/{submissionId}/{folder}/{filename}
     const objectKey = `actor-submissions/${submissionId}/${folder}/${sanitizedFilename}`;
 
-    // Lazy-import R2 helpers so that module-level import errors
-    // (e.g. AWS SDK bundling failures) are caught inside the try/catch
-    // and always produce a JSON response instead of a Vercel crash page.
-    const { getR2Client, getR2BucketName } = await import("./_r2");
-
     const bucketName = getR2BucketName();
     const r2 = getR2Client();
-
-    const { PutObjectCommand } = await import("@aws-sdk/client-s3");
 
     await r2.send(
       new PutObjectCommand({
