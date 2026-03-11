@@ -1,34 +1,4 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-
-function getR2Client(): S3Client {
-  const accountId = process.env.R2_ACCOUNT_ID;
-  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
-  const endpoint =
-    process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
-
-  if (!endpoint || !accessKeyId || !secretAccessKey) {
-    throw new Error(
-      "R2 environment variables are not configured. Required: R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and either R2_ENDPOINT or R2_ACCOUNT_ID"
-    );
-  }
-
-  return new S3Client({
-    region: "auto",
-    endpoint,
-    credentials: { accessKeyId, secretAccessKey },
-  });
-}
-
-function getR2BucketName(): string {
-  const bucketName = process.env.R2_BUCKET_NAME;
-  if (!bucketName) {
-    throw new Error("R2_BUCKET_NAME is not configured");
-  }
-  return bucketName;
-}
 
 /**
  * Server-side signed URL generator for private R2 objects.
@@ -88,8 +58,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: "Invalid object key format" });
     }
 
-    const bucketName = getR2BucketName();
-    const r2 = getR2Client();
+    const { S3Client, GetObjectCommand } = await import("@aws-sdk/client-s3");
+    const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
+
+    const accountId = process.env.R2_ACCOUNT_ID;
+    const accessKeyId = process.env.R2_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+    const endpoint =
+      process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+
+    if (!endpoint || !accessKeyId || !secretAccessKey) {
+      return res.status(500).json({ error: "R2 environment variables are not configured" });
+    }
+
+    const bucketName = process.env.R2_BUCKET_NAME;
+    if (!bucketName) {
+      return res.status(500).json({ error: "R2_BUCKET_NAME is not configured" });
+    }
+
+    const r2 = new S3Client({
+      region: "auto",
+      endpoint,
+      credentials: { accessKeyId, secretAccessKey },
+    });
 
     const command = new GetObjectCommand({
       Bucket: bucketName,
