@@ -77,7 +77,7 @@ export function validateAudioFile(file: File): FileValidationResult {
 }
 
 /**
- * Upload a file to R2 via the server-side API route.
+ * Upload a file to R2 using a direct presigned URL.
  *
  * Returns the R2 object key on success (NOT a full URL).
  * The key follows the convention: actor-submissions/{submissionId}/{folder}/{filename}
@@ -97,41 +97,56 @@ export async function uploadFileToR2(
     // Create a blob with normalized MIME type for mobile compatibility
     const normalizedBlob = new Blob([file], { type: normalizedMime });
 
-    const params = new URLSearchParams({
-      folder,
-      submissionId,
-      filename: uploadFilename,
+    logger.log(`[R2 Upload Setup] Requesting presigned URL for ${uploadFilename}`);
+
+    // Step 1: Get presigned URL from Vercel API
+    const urlResponse = await fetch(`/api/upload`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        folder,
+        submissionId,
+        filename: uploadFilename,
+        contentType: normalizedMime,
+      }),
     });
 
-    logger.log(`[R2 Upload] Uploading to /api/upload?${params.toString()}`);
+    if (!urlResponse.ok) {
+      let serverError: string;
+      try {
+        const errorData = await urlResponse.json();
+        serverError = errorData.error || `Server responded with ${urlResponse.status}`;
+      } catch {
+        const bodySnippet = await urlResponse.text().catch(() => "");
+        logger.error("[R2 Upload Setup] Non-JSON response body:", bodySnippet.slice(0, 200));
+        serverError = `Presigned URL API returned ${urlResponse.status}`;
+      }
+      logger.error("[R2 Upload Setup] Server error:", serverError);
+      return { objectKey: null, error: serverError };
+    }
 
-    const response = await fetch(`/api/upload?${params.toString()}`, {
-      method: "POST",
+    const { uploadUrl, objectKey } = await urlResponse.json();
+    logger.log(`[R2 Upload] Got presigned URL. Uploading direct to R2...`);
+
+    // Step 2: Upload directly to R2 using the presigned URL
+    const uploadResponse = await fetch(uploadUrl, {
+      method: "PUT",
       headers: {
         "Content-Type": normalizedMime,
       },
       body: normalizedBlob,
     });
 
-    if (!response.ok) {
-      let serverError: string;
-      try {
-        const errorData = await response.json();
-        serverError = errorData.error || `Server responded with ${response.status}`;
-      } catch {
-        // Response was not JSON — likely an HTML error page from Vercel,
-        // meaning the serverless function crashed before it could respond.
-        const bodySnippet = await response.text().catch(() => "");
-        logger.error("[R2 Upload] Non-JSON response body:", bodySnippet.slice(0, 200));
-        serverError = `Upload API returned ${response.status} (non-JSON response — check Vercel function logs)`;
-      }
-      logger.error("[R2 Upload] Server error:", serverError);
-      return { objectKey: null, error: serverError };
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text().catch(() => "");
+      logger.error(`[R2 Direct Upload] Failed with status ${uploadResponse.status}:`, errorText.slice(0, 200));
+      return { objectKey: null, error: `העלאה נכשלה (R2 status ${uploadResponse.status})` };
     }
 
-    const data = await response.json();
-    logger.log(`[R2 Upload] Success. Object key: ${data.objectKey}`);
-    return { objectKey: data.objectKey, error: null };
+    logger.log(`[R2 Upload] Success. Object key: ${objectKey}`);
+    return { objectKey, error: null };
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err);
     logger.error("[R2 Upload] Exception:", detail);

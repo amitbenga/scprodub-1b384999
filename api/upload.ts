@@ -3,8 +3,6 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 const ALLOWED_FOLDERS = ["images", "audio", "documents"] as const;
 type AllowedFolder = (typeof ALLOWED_FOLDERS)[number];
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
 const ALLOWED_MIME_TYPES: Record<AllowedFolder, string[]> = {
   images: ["image/jpeg", "image/png", "image/webp", "image/gif"],
   audio: [
@@ -27,13 +25,12 @@ function isAllowedFolder(folder: string): folder is AllowedFolder {
 }
 
 /**
- * Vercel serverless function for uploading files to Cloudflare R2.
+ * Vercel serverless function for generating a Cloudflare R2 Presigned Upload URL.
  *
- * Expects:
- * - Raw file body (Content-Type set to the file's MIME type)
- * - Query params: folder, submissionId, filename
+ * Expects POST JSON body:
+ * { folder, submissionId, filename, contentType }
  *
- * Returns: { objectKey: string }
+ * Returns: { uploadUrl: string, objectKey: string }
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS headers for the SPA
@@ -50,14 +47,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const folder = req.query.folder as string;
-    const submissionId = req.query.submissionId as string;
-    const filename = req.query.filename as string;
-    const contentType = req.headers["content-type"] || "application/octet-stream";
+    const { folder, submissionId, filename, contentType } = req.body || {};
 
     // Validate required params
-    if (!folder || !submissionId || !filename) {
-      return res.status(400).json({ error: "Missing required query params: folder, submissionId, filename" });
+    if (!folder || !submissionId || !filename || !contentType) {
+      return res.status(400).json({ error: "Missing required JSON body params: folder, submissionId, filename, contentType" });
     }
 
     // Validate folder
@@ -76,23 +70,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: "Invalid submissionId format" });
     }
 
-    // Read the raw body
-    const chunks: Buffer[] = [];
-    await new Promise<void>((resolve, reject) => {
-      req.on("data", (chunk: Buffer) => chunks.push(chunk));
-      req.on("end", resolve);
-      req.on("error", reject);
-    });
-    const fileBuffer = Buffer.concat(chunks);
-
-    // Validate file size
-    if (fileBuffer.length === 0) {
-      return res.status(400).json({ error: "Empty file body" });
-    }
-    if (fileBuffer.length > MAX_FILE_SIZE) {
-      return res.status(400).json({ error: "File too large (max 10MB)" });
-    }
-
     // Sanitize filename (keep extension, replace unsafe chars)
     const sanitizedFilename = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
 
@@ -100,10 +77,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // actor-submissions/{submissionId}/{folder}/{filename}
     const objectKey = `actor-submissions/${submissionId}/${folder}/${sanitizedFilename}`;
 
-    // Dynamic import: the AWS SDK must NOT be a top-level import.
-    // Vercel's bundler can fail to bundle it as a static import, causing the
-    // function to crash on cold start with a non-JSON error page.
     const { S3Client, PutObjectCommand } = await import("@aws-sdk/client-s3");
+    const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
 
     const accountId = process.env.R2_ACCOUNT_ID;
     const accessKeyId = process.env.R2_ACCESS_KEY_ID;
@@ -128,27 +103,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       credentials: { accessKeyId, secretAccessKey },
     });
 
-    await r2.send(
-      new PutObjectCommand({
-        Bucket: bucketName,
-        Key: objectKey,
-        Body: fileBuffer,
-        ContentType: contentType,
-      })
-    );
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: objectKey,
+      ContentType: contentType,
+    });
 
-    console.log(`[R2 Upload] OK: ${objectKey} (${fileBuffer.length} bytes, ${contentType})`);
+    // Generate a temporary PUT URL that expires in 15 minutes
+    const uploadUrl = await getSignedUrl(r2, command, { expiresIn: 900 });
 
-    return res.status(200).json({ objectKey });
+    console.log(`[R2 Upload URL Issued] OK: ${objectKey} (${contentType})`);
+
+    return res.status(200).json({ uploadUrl, objectKey });
   } catch (err) {
-    console.error("[R2 Upload] Error:", err);
-    const message = err instanceof Error ? err.message : "Upload failed";
+    console.error("[R2 Upload URL] Error:", err);
+    const message = err instanceof Error ? err.message : "Failed to generate signed upload URL";
     return res.status(500).json({ error: message });
   }
 }
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
