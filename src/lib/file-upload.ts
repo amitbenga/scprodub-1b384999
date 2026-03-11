@@ -133,8 +133,9 @@ export async function uploadFileToR2(
     logger.log(`[R2 Upload] Success. Object key: ${data.objectKey}`);
     return { objectKey: data.objectKey, error: null };
   } catch (err) {
-    logger.error("[R2 Upload] Exception:", err);
-    return { objectKey: null, error: "שגיאה בהעלאת הקובץ" };
+    const detail = err instanceof Error ? err.message : String(err);
+    logger.error("[R2 Upload] Exception:", detail);
+    return { objectKey: null, error: `שגיאה בהעלאת הקובץ: ${detail}` };
   }
 }
 
