@@ -87,17 +87,17 @@ export function ActorIntakeForm() {
   const [gender, setGender] = useState("");
   const [birthYear, setBirthYear] = useState<string>("");
   const [city, setCity] = useState("");
-  
+
   // Dubbing experience
   const [dubbingExperienceYears, setDubbingExperienceYears] = useState<string>("0");
-  
+
   // Singing
   const [singingLevel, setSingingLevel] = useState<string>("");
   const [singingStyles, setSingingStyles] = useState<string[]>([]);
   const [singingStylesOther, setSingingStylesOther] = useState<string[]>([]);
   const [newOtherStyleName, setNewOtherStyleName] = useState("");
   const [singingSampleFile, setSingingSampleFile] = useState<File | null>(null);
-  
+
   // Other fields
   const [vatStatus, setVatStatus] = useState("");
   const [languages, setLanguages] = useState<string[]>([]);
@@ -173,9 +173,18 @@ export function ActorIntakeForm() {
     if (!validate()) {
       toast({
         title: "שגיאה",
-        description: "נא לתקן את השגיאות בטופס",
+        description: "נא לתקן השגיאות בטופס",
         variant: "destructive",
       });
+
+      // Auto-scroll to the first validation error so the user isn't blindly staring at the bottom
+      setTimeout(() => {
+        const errorEl = document.querySelector('.text-destructive');
+        if (errorEl) {
+          errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+
       return;
     }
 
@@ -328,17 +337,17 @@ export function ActorIntakeForm() {
     <div className="min-h-screen relative">
       {/* Fixed microphone background decorations */}
       <div className="fixed top-0 left-0 h-screen w-[400px] opacity-25 pointer-events-none hidden lg:block z-0">
-        <img 
-          src={microphoneBg} 
-          alt="" 
+        <img
+          src={microphoneBg}
+          alt=""
           className="w-full h-full object-cover object-center grayscale"
           style={{ transform: 'scaleX(-1)' }}
         />
       </div>
       <div className="fixed top-0 right-0 h-screen w-[400px] opacity-25 pointer-events-none hidden lg:block z-0">
-        <img 
-          src={microphoneBg} 
-          alt="" 
+        <img
+          src={microphoneBg}
+          alt=""
           className="w-full h-full object-cover object-center grayscale"
         />
       </div>
@@ -352,421 +361,421 @@ export function ActorIntakeForm() {
 
       <div className="py-8 px-4 relative z-10">
         <div className="max-w-lg md:max-w-2xl mx-auto relative">
-        {/* Header with logo and social links */}
-        <header className="flex items-center justify-between mb-8 px-2">
-          {/* Logo - Right side (RTL so appears on right) */}
-          <img src={scprodubLogo} alt="SCprodub" className="h-10" />
+          {/* Header with logo and social links */}
+          <header className="flex items-center justify-between mb-8 px-2">
+            {/* Logo - Right side (RTL so appears on right) */}
+            <img src={scprodubLogo} alt="SCprodub" className="h-10" />
 
-          {/* Social Links - Left side (RTL so appears on left) */}
-          <div className="flex items-center gap-2">
-            <a
-              href="https://www.facebook.com/sc.produb.5"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full bg-muted flex items-center justify-center hover:bg-primary/10 transition-colors"
-              aria-label="פייסבוק"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-              </svg>
-            </a>
-            <a
-              href="https://www.instagram.com/scprodub/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full bg-muted flex items-center justify-center hover:bg-primary/10 transition-colors"
-              aria-label="אינסטגרם"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-              </svg>
-            </a>
-            <a
-              href="https://www.sc-produb.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full bg-muted flex items-center justify-center hover:bg-primary/10 transition-colors overflow-hidden"
-              aria-label="אתר SCprodub"
-            >
-              <img src={scWebsiteLogo} alt="SC" className="w-6 h-6 object-contain" />
-            </a>
-          </div>
-        </header>
-
-        {/* Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-foreground mb-2">טופס הרשמה לשחקני דיבוב</h1>
-          <p className="text-muted-foreground">הצטרפו למאגר השחקנים שלנו ותהיו חלק מהפקות בינלאומיות</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Section 1: Personal Details */}
-          <FormSection title="פרטים אישיים" icon={User}>
-            <p className="text-xs text-muted-foreground -mt-2 mb-4">משמש לזיהוי במערכת</p>
-            
-            <div className="space-y-2">
-              <Label htmlFor="fullName">שם מלא *</Label>
-              <Input
-                id="fullName"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className={errors.full_name ? "border-destructive" : ""}
-              />
-              {errors.full_name && (
-                <p className="text-xs text-destructive">{errors.full_name}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label>מגדר *</Label>
-              <Select value={gender} onValueChange={setGender}>
-                <SelectTrigger className={errors.gender ? "border-destructive" : ""}>
-                  <SelectValue placeholder="בחירה..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {GENDERS.map((g) => (
-                    <SelectItem key={g.value} value={g.value}>
-                      {g.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.gender && (
-                <p className="text-xs text-destructive">{errors.gender}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label>שנת לידה *</Label>
-              <Select value={birthYear} onValueChange={setBirthYear}>
-                <SelectTrigger className={errors.birth_year ? "border-destructive" : ""}>
-                  <SelectValue placeholder="בחירה..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {BIRTH_YEARS.map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.birth_year && (
-                <p className="text-xs text-destructive">{errors.birth_year}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">טלפון *</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className={errors.phone ? "border-destructive" : ""}
-              />
-              {errors.phone && (
-                <p className="text-xs text-destructive">{errors.phone}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">אימייל *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={errors.email ? "border-destructive" : ""}
-              />
-              {errors.email && (
-                <p className="text-xs text-destructive">{errors.email}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="city">עיר</Label>
-              <Input
-                id="city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="עיר מגורים"
-              />
-            </div>
-          </FormSection>
-
-          {/* Section 2: Dubbing Experience */}
-          <FormSection title="ניסיון בדיבוב" icon={Briefcase}>
-            <div className="space-y-2">
-              <Label htmlFor="dubbingExperience">ניסיון בדיבוב (בשנים)</Label>
-              <Input
-                id="dubbingExperience"
-                type="number"
-                min="0"
-                max="50"
-                value={dubbingExperienceYears}
-                onChange={(e) => setDubbingExperienceYears(e.target.value)}
-                className="w-32"
-              />
-            </div>
-
+            {/* Social Links - Left side (RTL so appears on left) */}
             <div className="flex items-center gap-2">
-              <Checkbox
-                id="isCourseGraduate"
-                checked={isCourseGraduate}
-                onCheckedChange={(checked) => setIsCourseGraduate(checked === true)}
-              />
-              <Label htmlFor="isCourseGraduate" className="font-normal cursor-pointer">
-                בוגר/ת קורס דיבוב
-              </Label>
+              <a
+                href="https://www.facebook.com/sc.produb.5"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-muted flex items-center justify-center hover:bg-primary/10 transition-colors"
+                aria-label="פייסבוק"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                </svg>
+              </a>
+              <a
+                href="https://www.instagram.com/scprodub/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-muted flex items-center justify-center hover:bg-primary/10 transition-colors"
+                aria-label="אינסטגרם"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                </svg>
+              </a>
+              <a
+                href="https://www.sc-produb.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-muted flex items-center justify-center hover:bg-primary/10 transition-colors overflow-hidden"
+                aria-label="אתר SCprodub"
+              >
+                <img src={scWebsiteLogo} alt="SC" className="w-6 h-6 object-contain" />
+              </a>
             </div>
+          </header>
 
-            <div className="space-y-2">
-              <Label htmlFor="studiedAt">לימודים</Label>
-              <Input
-                id="studiedAt"
-                value={studiedAt}
-                onChange={(e) => setStudiedAt(e.target.value)}
-                placeholder="שם הקורס / המוסד הלימודי (אם רלוונטי)"
-              />
-            </div>
-          </FormSection>
+          {/* Title */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-foreground mb-2">טופס הרשמה לשחקני דיבוב</h1>
+            <p className="text-muted-foreground">הצטרפו למאגר השחקנים שלנו ותהיו חלק מהפקות בינלאומיות</p>
+          </div>
 
-          {/* Section 3: Singing */}
-          <FormSection title="שירה" icon={Music}>
-            <div className="space-y-2">
-              <Label>רמת שירה</Label>
-              <Select value={singingLevel} onValueChange={setSingingLevel}>
-                <SelectTrigger>
-                  <SelectValue placeholder="בחירה..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {SINGING_LEVELS.map((level) => (
-                    <SelectItem key={level.value || "none"} value={level.value || "none"}>
-                      {level.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Section 1: Personal Details */}
+            <FormSection title="פרטים אישיים" icon={User}>
+              <p className="text-xs text-muted-foreground -mt-2 mb-4">משמש לזיהוי במערכת</p>
 
-            {showSingingStyles && (
-              <>
-                <div className="space-y-3">
-                  <Label>סגנונות שירה</Label>
-                  <ChipSelect
-                    options={SINGING_STYLES}
-                    selected={singingStyles}
-                    onChange={setSingingStyles}
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="fullName">שם מלא *</Label>
+                <Input
+                  id="fullName"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className={errors.full_name ? "border-destructive" : ""}
+                />
+                {errors.full_name && (
+                  <p className="text-xs text-destructive">{errors.full_name}</p>
+                )}
+              </div>
 
-                <div className="space-y-3">
-                  <Label>סגנונות שירה נוספים</Label>
-                  
-                  {singingStylesOther.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {singingStylesOther.map((style, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm"
-                        >
-                          <span>{style}</span>
-                          <button
-                            type="button"
-                            onClick={() => removeOtherSingingStyle(index)}
-                            className="mr-1 hover:text-destructive"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+              <div className="space-y-2">
+                <Label>מגדר *</Label>
+                <Select value={gender} onValueChange={setGender}>
+                  <SelectTrigger className={errors.gender ? "border-destructive" : ""}>
+                    <SelectValue placeholder="בחירה..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {GENDERS.map((g) => (
+                      <SelectItem key={g.value} value={g.value}>
+                        {g.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.gender && (
+                  <p className="text-xs text-destructive">{errors.gender}</p>
+                )}
+              </div>
 
-                  <div className="flex gap-2 items-end">
-                    <div className="flex-1 min-w-[150px]">
-                      <Input
-                        value={newOtherStyleName}
-                        onChange={(e) => setNewOtherStyleName(e.target.value)}
-                        placeholder="שם הסגנון"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            addOtherSingingStyle();
-                          }
-                        }}
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={addOtherSingingStyle}
-                      disabled={!newOtherStyleName.trim()}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
+              <div className="space-y-2">
+                <Label>שנת לידה *</Label>
+                <Select value={birthYear} onValueChange={setBirthYear}>
+                  <SelectTrigger className={errors.birth_year ? "border-destructive" : ""}>
+                    <SelectValue placeholder="בחירה..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BIRTH_YEARS.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.birth_year && (
+                  <p className="text-xs text-destructive">{errors.birth_year}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">טלפון *</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className={errors.phone ? "border-destructive" : ""}
+                />
+                {errors.phone && (
+                  <p className="text-xs text-destructive">{errors.phone}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">אימייל *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={errors.email ? "border-destructive" : ""}
+                />
+                {errors.email && (
+                  <p className="text-xs text-destructive">{errors.email}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="city">עיר</Label>
+                <Input
+                  id="city"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="עיר מגורים"
+                />
+              </div>
+            </FormSection>
+
+            {/* Section 2: Dubbing Experience */}
+            <FormSection title="ניסיון בדיבוב" icon={Briefcase}>
+              <div className="space-y-2">
+                <Label htmlFor="dubbingExperience">ניסיון בדיבוב (בשנים)</Label>
+                <Input
+                  id="dubbingExperience"
+                  type="number"
+                  min="0"
+                  max="50"
+                  value={dubbingExperienceYears}
+                  onChange={(e) => setDubbingExperienceYears(e.target.value)}
+                  className="w-32"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="isCourseGraduate"
+                  checked={isCourseGraduate}
+                  onCheckedChange={(checked) => setIsCourseGraduate(checked === true)}
+                />
+                <Label htmlFor="isCourseGraduate" className="font-normal cursor-pointer">
+                  בוגר/ת קורס דיבוב
+                </Label>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="studiedAt">לימודים</Label>
+                <Input
+                  id="studiedAt"
+                  value={studiedAt}
+                  onChange={(e) => setStudiedAt(e.target.value)}
+                  placeholder="שם הקורס / המוסד הלימודי (אם רלוונטי)"
+                />
+              </div>
+            </FormSection>
+
+            {/* Section 3: Singing */}
+            <FormSection title="שירה" icon={Music}>
+              <div className="space-y-2">
+                <Label>רמת שירה</Label>
+                <Select value={singingLevel} onValueChange={setSingingLevel}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="בחירה..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SINGING_LEVELS.map((level) => (
+                      <SelectItem key={level.value || "none"} value={level.value || "none"}>
+                        {level.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {showSingingStyles && (
+                <>
+                  <div className="space-y-3">
+                    <Label>סגנונות שירה</Label>
+                    <ChipSelect
+                      options={SINGING_STYLES}
+                      selected={singingStyles}
+                      onChange={setSingingStyles}
+                    />
                   </div>
+
+                  <div className="space-y-3">
+                    <Label>סגנונות שירה נוספים</Label>
+
+                    {singingStylesOther.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {singingStylesOther.map((style, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm"
+                          >
+                            <span>{style}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeOtherSingingStyle(index)}
+                              className="mr-1 hover:text-destructive"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="flex gap-2 items-end">
+                      <div className="flex-1 min-w-[150px]">
+                        <Input
+                          value={newOtherStyleName}
+                          onChange={(e) => setNewOtherStyleName(e.target.value)}
+                          placeholder="שם הסגנון"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              addOtherSingingStyle();
+                            }
+                          }}
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={addOtherSingingStyle}
+                        disabled={!newOtherStyleName.trim()}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </FormSection>
+
+            {/* Section 4: Skills */}
+            <FormSection title="כישורים" icon={Sparkles}>
+              <div className="space-y-2">
+                <Label>כישורים</Label>
+                <ChipSelect
+                  options={SKILLS}
+                  selected={skills}
+                  onChange={setSkills}
+                />
+              </div>
+
+              {showSkillsOther && (
+                <div className="space-y-2">
+                  <Label htmlFor="skillsOther">כישור אחר</Label>
+                  <Input
+                    id="skillsOther"
+                    value={skillsOther}
+                    onChange={(e) => setSkillsOther(e.target.value)}
+                    placeholder="פרט את הכישור..."
+                  />
+                  {skills.includes("אחר") && !skillsOther && (
+                    <p className="text-xs text-gold">בחרת ״אחר״ — נא לציין פרטים</p>
+                  )}
                 </div>
-              </>
-            )}
-          </FormSection>
+              )}
+            </FormSection>
 
-          {/* Section 4: Skills */}
-          <FormSection title="כישורים" icon={Sparkles}>
-            <div className="space-y-2">
-              <Label>כישורים</Label>
-              <ChipSelect
-                options={SKILLS}
-                selected={skills}
-                onChange={setSkills}
-              />
-            </div>
-
-            {showSkillsOther && (
+            {/* Section 5: Languages */}
+            <FormSection title="שפות בשליטה מלאה" icon={Languages}>
               <div className="space-y-2">
-                <Label htmlFor="skillsOther">כישור אחר</Label>
-                <Input
-                  id="skillsOther"
-                  value={skillsOther}
-                  onChange={(e) => setSkillsOther(e.target.value)}
-                  placeholder="פרט את הכישור..."
+                <Label>שפות *</Label>
+                <ChipSelect
+                  options={LANGUAGES}
+                  selected={languages}
+                  onChange={setLanguages}
                 />
-                {skills.includes("אחר") && !skillsOther && (
-                  <p className="text-xs text-gold">בחרת ״אחר״ — נא לציין פרטים</p>
+                {errors.languages && (
+                  <p className="text-xs text-destructive">{errors.languages}</p>
                 )}
               </div>
-            )}
-          </FormSection>
 
-          {/* Section 5: Languages */}
-          <FormSection title="שפות בשליטה מלאה" icon={Languages}>
-            <div className="space-y-2">
-              <Label>שפות *</Label>
-              <ChipSelect
-                options={LANGUAGES}
-                selected={languages}
-                onChange={setLanguages}
-              />
-              {errors.languages && (
-                <p className="text-xs text-destructive">{errors.languages}</p>
+              {showLanguagesOther && (
+                <div className="space-y-2">
+                  <Label htmlFor="languagesOther">שפה אחרת</Label>
+                  <Input
+                    id="languagesOther"
+                    value={languagesOther}
+                    onChange={(e) => setLanguagesOther(e.target.value)}
+                    placeholder="פרט את השפה..."
+                  />
+                  {languages.includes("אחר") && !languagesOther && (
+                    <p className="text-xs text-gold">בחרת ״אחר״ — נא לציין פרטים</p>
+                  )}
+                </div>
               )}
-            </div>
+            </FormSection>
 
-            {showLanguagesOther && (
+            {/* Section 6: VAT Status */}
+            <FormSection title="סטטוס עוסק" icon={FileText}>
               <div className="space-y-2">
-                <Label htmlFor="languagesOther">שפה אחרת</Label>
-                <Input
-                  id="languagesOther"
-                  value={languagesOther}
-                  onChange={(e) => setLanguagesOther(e.target.value)}
-                  placeholder="פרט את השפה..."
-                />
-                {languages.includes("אחר") && !languagesOther && (
-                  <p className="text-xs text-gold">בחרת ״אחר״ — נא לציין פרטים</p>
+                <Label>סטטוס עוסק *</Label>
+                <Select value={vatStatus} onValueChange={setVatStatus}>
+                  <SelectTrigger className={errors.vat_status ? "border-destructive" : ""}>
+                    <SelectValue placeholder="בחירה..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {VAT_STATUSES.map((vs) => (
+                      <SelectItem key={vs.value} value={vs.value}>
+                        {vs.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.vat_status && (
+                  <p className="text-xs text-destructive">{errors.vat_status}</p>
                 )}
               </div>
-            )}
-          </FormSection>
+            </FormSection>
 
-          {/* Section 6: VAT Status */}
-          <FormSection title="סטטוס עוסק" icon={FileText}>
-            <div className="space-y-2">
-              <Label>סטטוס עוסק *</Label>
-              <Select value={vatStatus} onValueChange={setVatStatus}>
-                <SelectTrigger className={errors.vat_status ? "border-destructive" : ""}>
-                  <SelectValue placeholder="בחירה..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {VAT_STATUSES.map((vs) => (
-                    <SelectItem key={vs.value} value={vs.value}>
-                      {vs.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.vat_status && (
-                <p className="text-xs text-destructive">{errors.vat_status}</p>
+            {/* Section 7: Notes */}
+            <FormSection title="הערות" icon={FileText}>
+              <div className="space-y-2">
+                <Label htmlFor="notes">הערות</Label>
+                <Textarea
+                  id="notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="מידע נוסף שחשוב לנו לדעת"
+                  rows={3}
+                />
+              </div>
+            </FormSection>
+
+            {/* Section 8: Media */}
+            <FormSection title="מדיה (מומלץ)" icon={Image}>
+              <div className="space-y-2">
+                <Label>תמונה</Label>
+                <FileUpload
+                  type="image"
+                  value={imageFile}
+                  onChange={setImageFile}
+                  helper="מלהקים נוטים לבחור שחקנים עם תמונה"
+                  error={errors.image}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>דוגמת קול</Label>
+                <AudioInput
+                  value={voiceSampleFile}
+                  onChange={setVoiceSampleFile}
+                  helper="מאוד מומלץ לצרף דוגמת קול"
+                  error={errors.voice_sample}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>דוגמת שירה</Label>
+                <AudioInput
+                  value={singingSampleFile}
+                  onChange={setSingingSampleFile}
+                  helper="צרפו דוגמת שירה אם רלוונטי"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="youtubeLink">לינק ליוטיוב</Label>
+                <Input
+                  id="youtubeLink"
+                  type="url"
+                  value={youtubeLink}
+                  onChange={(e) => setYoutubeLink(e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  dir="ltr"
+                />
+                <p className="form-helper">אם יש לכם תוכן שפורסם ביוטיוב — הדביקו את הלינק כאן</p>
+              </div>
+            </FormSection>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="submit-btn"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin ml-2 inline" />
+                  שולח...
+                </>
+              ) : (
+                "שליחה"
               )}
-            </div>
-          </FormSection>
-
-          {/* Section 7: Notes */}
-          <FormSection title="הערות" icon={FileText}>
-            <div className="space-y-2">
-              <Label htmlFor="notes">הערות</Label>
-              <Textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="מידע נוסף שחשוב לנו לדעת"
-                rows={3}
-              />
-            </div>
-          </FormSection>
-
-          {/* Section 8: Media */}
-          <FormSection title="מדיה (מומלץ)" icon={Image}>
-            <div className="space-y-2">
-              <Label>תמונה</Label>
-              <FileUpload
-                type="image"
-                value={imageFile}
-                onChange={setImageFile}
-                helper="מלהקים נוטים לבחור שחקנים עם תמונה"
-                error={errors.image}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>דוגמת קול</Label>
-              <AudioInput
-                value={voiceSampleFile}
-                onChange={setVoiceSampleFile}
-                helper="מאוד מומלץ לצרף דוגמת קול"
-                error={errors.voice_sample}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>דוגמת שירה</Label>
-              <AudioInput
-                value={singingSampleFile}
-                onChange={setSingingSampleFile}
-                helper="צרפו דוגמת שירה אם רלוונטי"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="youtubeLink">לינק ליוטיוב</Label>
-              <Input
-                id="youtubeLink"
-                type="url"
-                value={youtubeLink}
-                onChange={(e) => setYoutubeLink(e.target.value)}
-                placeholder="https://www.youtube.com/watch?v=..."
-                dir="ltr"
-              />
-              <p className="form-helper">אם יש לכם תוכן שפורסם ביוטיוב — הדביקו את הלינק כאן</p>
-            </div>
-          </FormSection>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="submit-btn"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin ml-2 inline" />
-                שולח...
-              </>
-            ) : (
-              "שליחה"
-            )}
-          </button>
-        </form>
+            </button>
+          </form>
         </div>
       </div>
     </div>
